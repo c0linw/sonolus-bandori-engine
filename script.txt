@@ -1,0 +1,1312 @@
+//
+// Bandori Engine
+// For Sonolus 0.2.0.0
+//
+// A recreation of BanG Dream! Girls Band Party engine
+// By Burrito
+//
+
+
+
+// Note Class
+
+IsNoteHeadOnScreen:LessOr(Subtract(NoteHeadTime Time) NoteScreenTime)
+IsNoteTailOnScreen:LessOr(Subtract(NoteTailTime Time) NoteScreenTime)
+
+InitNoteHead:Execute(
+    Set(EntityMemory *NoteHeadX Multiply(LaneWidth NoteHeadLane))
+    Set(EntityMemory *NoteHeadX1 Subtract(NoteHeadX HalfNoteWidth))
+    Set(EntityMemory *NoteHeadX2 Add(NoteHeadX HalfNoteWidth))
+)
+InitNoteTail:Execute(
+    Set(EntityMemory *NoteTailX Multiply(LaneWidth NoteTailLane))
+    Set(EntityMemory *NoteTailX1 Subtract(NoteTailX HalfNoteWidth))
+    Set(EntityMemory *NoteTailX2 Add(NoteTailX HalfNoteWidth))
+)
+InitSimLine:And(
+    SimLine
+    NoteSimLineIndex
+    Spawn(10 Index NoteSimLineIndex)
+)
+
+IsNoteTailInGoodWindow:LessOr(Subtract(NoteTailTime Subtract(Time InputOffset)) GoodWindow)
+
+IsTouchY:LessOr(TempTouchY JudgeYMax)
+IsTouchXInTailLane:And(
+    GreaterOr(TempTouchX Subtract(NoteTailX LaneWidth))
+    LessOr(TempTouchX Add(NoteTailX LaneWidth))
+)
+
+ProcessTouchHead:And(
+    Not(InputState)
+    If(
+        NoteHeadInputSuccess
+        And(
+            Equal(TempTouchID NoteHeadInputTouchID)
+            Not(TempTouchEnded)
+            Execute(
+                Set(TemporaryMemory *TempTouchOccupied true)
+                Set(EntityMemory *InputState Activated)
+                Set(EntitySharedMemory *InputTouchID TempTouchID)
+            )
+        )
+        And(
+            Equal(NoteHeadState Despawned)
+            LessOr(Subtract(NoteHeadTime Subtract(Time InputOffset)) GoodWindow)
+            TempTouchStarted
+            Not(TempTouchOccupied)
+            IsTouchY
+            GreaterOr(TempTouchX Subtract(NoteHeadX LaneWidth))
+            LessOr(TempTouchX Add(NoteHeadX LaneWidth))
+            Execute(
+                Set(TemporaryMemory *TempTouchOccupied true)
+                Set(EntityMemory *InputState Activated)
+                Set(EntitySharedMemory *InputTouchID TempTouchID)
+            )
+        )
+    )
+)
+
+ProcessTouchDiscontinue:And(
+    Or(
+        TempTouchEnded
+        Greater(TempTouchY JudgeYMax)
+        Greater(Subtract(Time InputOffset NoteTailTime) GoodWindow)
+    )
+    Set(EntityMemory *InputState Terminated)
+)
+
+UpdateNoteHeadTimeDistance:Set(EntityMemory *NoteHeadTimeDistance Subtract(Time NoteHeadTime))
+UpdateNoteTailTimeDistance:Set(EntityMemory *NoteTailTimeDistance Subtract(Time NoteTailTime))
+
+UpdateNoteTailScale:Set(EntityMemory *NoteTailScale Add(0.05 Multiply(0.95 Power(117.39085 Divide(NoteTailTimeDistance NoteScreenTime)))))
+
+DrawNoteTail:Execute(
+    Set(EntityMemory *NoteTailScale1 Multiply(NoteBaseY1 NoteTailScale))
+    Set(EntityMemory *NoteTailScale2 Multiply(NoteBaseY2 NoteTailScale))
+    Set(EntityMemory *NoteTailY1 Add(1 Multiply(-1.63265 NoteTailScale1)))
+    Set(EntityMemory *NoteTailY2 Add(1 Multiply(-1.63265 NoteTailScale2)))
+    Draw(
+        NoteTexture
+        Multiply(NoteTailScale1 NoteTailX1) NoteTailY1
+        Multiply(NoteTailScale2 NoteTailX1) NoteTailY2
+        Multiply(NoteTailScale2 NoteTailX2) NoteTailY2
+        Multiply(NoteTailScale1 NoteTailX2) NoteTailY1
+        LayerNoteBody
+        1
+    )
+)
+
+DrawNoteTailArrow:Execute(
+    Set(EntityMemory *NoteTailY Add(1 Multiply(-1.63265 NoteTailScale)))
+    Draw(
+        TextureArrow
+        Multiply(NoteTailScale NoteTailX1) NoteTailY
+        Multiply(NoteTailScale NoteTailX1) Add(NoteTailY Multiply(NoteTailScale NoteWidth))
+        Multiply(NoteTailScale NoteTailX2) Add(NoteTailY Multiply(NoteTailScale NoteWidth))
+        Multiply(NoteTailScale NoteTailX2) NoteTailY
+        LayerNoteMarker
+        1
+    )
+)
+
+DrawNoteSlide:And(
+    Greater(NoteTailTime Time)
+    Execute(
+        If(
+            InputState
+            Execute(
+                Set(EntityMemory *NoteHeadScale 1)
+                Set(EntityMemory *NoteHeadY -0.63265)
+
+                Set(EntityMemory *NoteHeadX Multiply(LaneWidth Lerp(NoteHeadLane NoteTailLane UnlerpClamped(NoteHeadTime NoteTailTime Time))))
+
+                Set(EntityMemory *NoteHeadX1 Subtract(NoteHeadX HalfNoteWidth))
+                Set(EntityMemory *NoteHeadX2 Add(NoteHeadX HalfNoteWidth))
+
+                Draw(
+                    TextureSlide
+                    Multiply(NoteBaseY1 NoteHeadX1) Subtract(-0.63265 NoteHeight)
+                    Multiply(NoteBaseY2 NoteHeadX1) Add(-0.63265 NoteHeight)
+                    Multiply(NoteBaseY2 NoteHeadX2) Add(-0.63265 NoteHeight)
+                    Multiply(NoteBaseY1 NoteHeadX2) Subtract(-0.63265 NoteHeight)
+                    LayerNoteSlide
+                    1
+                )
+            )
+            Execute(
+                Set(EntityMemory *NoteHeadScale Add(0.05 Multiply(0.95 Power(117.39085 Divide(NoteHeadTimeDistance NoteScreenTime)))))
+                Set(EntityMemory *NoteHeadY Add(1 Multiply(-1.63265 NoteHeadScale)))
+            )
+        )
+
+        Set(EntityMemory *NoteTailY Add(1 Multiply(-1.63265 NoteTailScale)))
+
+        Draw(
+            TextureLong
+            Multiply(NoteHeadScale NoteHeadX1) NoteHeadY
+            Multiply(NoteTailScale NoteTailX1) NoteTailY
+            Multiply(NoteTailScale NoteTailX2) NoteTailY
+            Multiply(NoteHeadScale NoteHeadX2) NoteHeadY
+            LayerNoteConnector
+            ConnectorAlpha
+        )
+    )
+)
+
+PlayTapEffect:Spawn(
+    7
+    Time
+    NoteTailX
+)
+
+PlayFlickEffect:Spawn(
+    8
+    Time
+    NoteTailX
+)
+
+PlayJudgmentSound:And(
+    SoundEffect
+    Play(Judgment MinEffectTime)
+)
+
+PlayFlickSound:And(
+    SoundEffect
+    Play(EffectFlick MinEffectTime)
+)
+
+PlayEmptySound:And(
+    SoundEffect
+    Play(EffectEmpty MinEffectTime)
+)
+
+
+
+// Effect Class
+
+UpdateEffectTimeDistance:Set(EntityMemory *EffectTimeDistance Subtract(Time EffectTime))
+
+DrawEffectC:Execute(
+    Set(EntityMemory *EffectAlpha Clamp(Divide(Subtract(0.6 EffectTimeDistance) 0.3 2) 0 0.5))
+
+    Set(
+        EntityMemory *HalfEffectWidth
+        Multiply(
+            HalfNoteWidth 2
+            If(
+                Less(EffectTimeDistance 0.5)
+                Multiply(4 Subtract(EffectTimeDistance Multiply(EffectTimeDistance EffectTimeDistance)))
+                1
+            )
+        )
+    )
+    Set(EntityMemory *HalfEffectHeight Multiply(0.7 HalfEffectWidth))
+    UpdateEffectPosition
+
+    DrawEffectCB
+    DrawEffectCF
+)
+
+UpdateEffectPosition:Execute(
+    Set(EntityMemory *EffectCX1 Subtract(EffectX HalfEffectWidth))
+    Set(EntityMemory *EffectCX2 Add(EffectX HalfEffectWidth))
+    Set(EntityMemory *EffectCY1 Subtract(-0.63265 HalfEffectHeight))
+    Set(EntityMemory *EffectCY2 Add(-0.63265 HalfEffectHeight))
+)
+
+DrawEffectCB:Draw(
+    TextureEffectCB
+    EffectCX1 EffectCY1
+    EffectCX1 EffectCY2
+    EffectCX2 EffectCY2
+    EffectCX2 EffectCY1
+    LayerEffectCB
+    EffectAlpha
+)
+
+DrawEffectCF:Draw(
+    TextureEffectCF
+    EffectCX1 EffectCY1
+    EffectCX1 EffectCY2
+    EffectCX2 EffectCY2
+    EffectCX2 EffectCY1
+    LayerEffectCF
+    EffectAlpha
+)
+
+DrawEffectL:Draw(
+    TextureEffectLB
+    EffectLX1 -0.63265
+    EffectLX2 EffectLY
+    EffectLX3 EffectLY
+    EffectLX4 -0.63265
+    LayerEffectLB
+    Clamp(Divide(Subtract(0.4 EffectTimeDistance) 0.2 2) 0 0.5)
+)
+
+
+
+// #0: Initialization
+
+#0.updateSequential:Execute(
+    Set(LevelMemory *StageAspectRatio If(AspectRatioFix 1.77778 AspectRatio))
+    Set(LevelMemory *LaneWidth Divide(StageAspectRatio 4.375))
+    Set(LevelMemory *NoteWidth Multiply(LaneWidth NoteSize))
+    Set(LevelMemory *NoteHeight Multiply(NoteSize 0.08571))
+    Set(LevelMemory *HalfNoteWidth Divide(NoteWidth 2))
+    Set(LevelMemory *NoteBaseY1 Subtract(1 Divide(NoteHeight -1.63265)))
+    Set(LevelMemory *NoteBaseY2 Add(1 Divide(NoteHeight -1.63265)))
+    Set(LevelMemory *NoteScreenTime Divide(Subtract(12 NoteSpeed) 2))
+    true
+)
+
+
+
+// #1: Stage
+
+#1.shouldSpawn:Equal(Get(EntityInfoArray *State) Despawned)
+
+#1.initialize:Execute(
+    Set(EntityMemory *JudgeX1 Multiply(-1 AspectRatio))
+    Set(EntityMemory *JudgeX2 Multiply(1 AspectRatio))
+    Set(EntityMemory *LaneBX-3.5 Multiply(-3.5 LaneWidth))
+    Set(EntityMemory *LaneBX-2.5 Multiply(-2.5 LaneWidth))
+    Set(EntityMemory *LaneBX-1.5 Multiply(-1.5 LaneWidth))
+    Set(EntityMemory *LaneBX-0.5 Multiply(-0.5 LaneWidth))
+    Set(EntityMemory *LaneBX0.5 Multiply(0.5 LaneWidth))
+    Set(EntityMemory *LaneBX1.5 Multiply(1.5 LaneWidth))
+    Set(EntityMemory *LaneBX2.5 Multiply(2.5 LaneWidth))
+    Set(EntityMemory *LaneBX3.5 Multiply(3.5 LaneWidth))
+    Set(EntityMemory *LaneTX-3.5 Multiply(0.05 LaneBX-3.5))
+    Set(EntityMemory *LaneTX-2.5 Multiply(0.05 LaneBX-2.5))
+    Set(EntityMemory *LaneTX-1.5 Multiply(0.05 LaneBX-1.5))
+    Set(EntityMemory *LaneTX-0.5 Multiply(0.05 LaneBX-0.5))
+    Set(EntityMemory *LaneTX0.5 Multiply(0.05 LaneBX0.5))
+    Set(EntityMemory *LaneTX1.5 Multiply(0.05 LaneBX1.5))
+    Set(EntityMemory *LaneTX2.5 Multiply(0.05 LaneBX2.5))
+    Set(EntityMemory *LaneTX3.5 Multiply(0.05 LaneBX3.5))
+)
+
+#1.updateSequential:And(
+    StageTilt
+    Execute(
+        Set(LevelTransform 4 Multiply(0.5 Add(Get(LevelTransform 4) Divide(Tilt AspectRatio -10))))
+        Set(EntityMemory *Tilt 0)
+    )
+)
+
+#1.updateParallel:Execute(
+    Draw(
+        TextureJudgeLine
+        JudgeX1 -0.64265
+        JudgeX1 -0.62265
+        JudgeX2 -0.62265
+        JudgeX2 -0.64265
+        LayerJudgeLine
+        1
+    )
+    Draw(
+        TextureLane
+        LaneBX-3.5 -0.63265
+        LaneTX-3.5 0.91837
+        LaneTX-2.5 0.91837
+        LaneBX-2.5 -0.63265
+        LayerLane
+        1
+    )
+    Draw(
+        TextureLane
+        LaneBX-2.5 -0.63265
+        LaneTX-2.5 0.91837
+        LaneTX-1.5 0.91837
+        LaneBX-1.5 -0.63265
+        LayerLane
+        1
+    )
+    Draw(
+        TextureLane
+        LaneBX-1.5 -0.63265
+        LaneTX-1.5 0.91837
+        LaneTX-0.5 0.91837
+        LaneBX-0.5 -0.63265
+        LayerLane
+        1
+    )
+    Draw(
+        TextureLane
+        LaneBX-0.5 -0.63265
+        LaneTX-0.5 0.91837
+        LaneTX0.5 0.91837
+        LaneBX0.5 -0.63265
+        LayerLane
+        1
+    )
+    Draw(
+        TextureLane
+        LaneBX0.5 -0.63265
+        LaneTX0.5 0.91837
+        LaneTX1.5 0.91837
+        LaneBX1.5 -0.63265
+        LayerLane
+        1
+    )
+    Draw(
+        TextureLane
+        LaneBX1.5 -0.63265
+        LaneTX1.5 0.91837
+        LaneTX2.5 0.91837
+        LaneBX2.5 -0.63265
+        LayerLane
+        1
+    )
+    Draw(
+        TextureLane
+        LaneBX2.5 -0.63265
+        LaneTX2.5 0.91837
+        LaneTX3.5 0.91837
+        LaneBX3.5 -0.63265
+        LayerLane
+        1
+    )
+)
+
+#1.touch@1:Execute(
+    Set(EntityMemory *Tilt Add(Tilt TempTouchX))
+    And(
+        TempTouchStarted
+        Not(TempTouchOccupied)
+        IsTouchY
+        Execute(
+            And(
+                GreaterOr(TempTouchX LaneBX-3.5)
+                LessOr(TempTouchX LaneBX-2.5)
+                Execute(
+                    PlayEmptySound
+                    Spawn(
+                        9
+                        Time
+                        -3
+                    )
+                )
+            )
+            And(
+                GreaterOr(TempTouchX LaneBX-2.5)
+                LessOr(TempTouchX LaneBX-1.5)
+                Execute(
+                    PlayEmptySound
+                    Spawn(
+                        9
+                        Time
+                        -2
+                    )
+                )
+            )
+            And(
+                GreaterOr(TempTouchX LaneBX-1.5)
+                LessOr(TempTouchX LaneBX-0.5)
+                Execute(
+                    PlayEmptySound
+                    Spawn(
+                        9
+                        Time
+                        -1
+                    )
+                )
+            )
+            And(
+                GreaterOr(TempTouchX LaneBX-0.5)
+                LessOr(TempTouchX LaneBX0.5)
+                Execute(
+                    PlayEmptySound
+                    Spawn(
+                        9
+                        Time
+                        0
+                    )
+                )
+            )
+            And(
+                GreaterOr(TempTouchX LaneBX0.5)
+                LessOr(TempTouchX LaneBX1.5)
+                Execute(
+                    PlayEmptySound
+                    Spawn(
+                        9
+                        Time
+                        1
+                    )
+                )
+            )
+            And(
+                GreaterOr(TempTouchX LaneBX1.5)
+                LessOr(TempTouchX LaneBX2.5)
+                Execute(
+                    PlayEmptySound
+                    Spawn(
+                        9
+                        Time
+                        2
+                    )
+                )
+            )
+            And(
+                GreaterOr(TempTouchX LaneBX2.5)
+                LessOr(TempTouchX LaneBX3.5)
+                Execute(
+                    PlayEmptySound
+                    Spawn(
+                        9
+                        Time
+                        3
+                    )
+                )
+            )
+        )
+    )
+)
+
+
+
+// #2: Tap Note
+
+#2.shouldSpawn:IsNoteTailOnScreen
+
+#2.initialize:Execute(
+    InitNoteTail
+    InitSimLine
+)
+
+#2.touch:And(
+    Not(InputState)
+    IsNoteTailInGoodWindow
+    TempTouchStarted
+    Not(TempTouchOccupied)
+    IsTouchY
+    IsTouchXInTailLane
+    Execute(
+        Set(TemporaryMemory *TempTouchOccupied true)
+        Set(EntityMemory *InputState Terminated)
+        Set(EntitySharedMemory *InputSuccess true)
+        Set(EntitySharedMemory *InputTouchID TempTouchID)
+        Set(EntityInput *Judgment JudgeSimple(Subtract(TempTouchST InputOffset) NoteTailTime PerfectWindow GreatWindow GoodWindow))
+        PlayTapEffect
+        PlayJudgmentSound
+    )
+)
+
+#2.updateParallel:Execute(
+    UpdateNoteTailTimeDistance
+    Or(
+        Equal(InputState Terminated)
+        Greater(Subtract(NoteTailTimeDistance InputOffset) GoodWindow)
+        Execute(
+            UpdateNoteTailScale
+            DrawNoteTail
+        )
+    )
+)
+
+
+
+// #3: Flick Note
+
+#3.shouldSpawn:IsNoteTailOnScreen
+
+#3.initialize:Execute(
+    InitNoteTail
+    InitSimLine
+)
+
+#3.touch:Execute(
+    And(
+        Not(InputState)
+        IsNoteTailInGoodWindow
+        TempTouchStarted
+        Not(TempTouchOccupied)
+        IsTouchY
+        IsTouchXInTailLane
+        Execute(
+            Set(TemporaryMemory *TempTouchOccupied true)
+            Set(EntityMemory *InputState Activated)
+            Set(EntityMemory *ActivationTime TempTouchST)
+            Set(EntitySharedMemory *InputTouchID TempTouchID)
+        )
+    )
+    And(
+        InputState
+        NotEqual(InputState Terminated)
+        Equal(TempTouchID InputTouchID)
+        Execute(
+            Set(TemporaryMemory *TempTouchOccupied true)
+            Or(
+                And(
+                    IsNoteTailInGoodWindow
+                    IsTouchY
+                    GreaterOr(TempTouchVR MinVR)
+                    Execute(
+                        Set(EntityMemory *InputState Terminated)
+                        Set(EntitySharedMemory *InputSuccess true)
+                        Set(EntityInput *Judgment JudgeSimple(Subtract(ActivationTime InputOffset) NoteTailTime PerfectWindow GreatWindow GoodWindow))
+                        PlayFlickEffect
+                        PlayFlickSound
+                        true
+                    )
+                )
+                ProcessTouchDiscontinue
+            )
+        )
+    )
+)
+
+#3.updateParallel:Execute(
+    UpdateNoteTailTimeDistance
+    Or(
+        Equal(InputState Terminated)
+        Greater(Subtract(NoteTailTimeDistance InputOffset) GoodWindow)
+        Execute(
+            UpdateNoteTailScale
+            DrawNoteTail
+            DrawNoteTailArrow
+        )
+    )
+)
+
+
+
+// #4: Slide Touch Note
+
+#4.shouldSpawn:IsNoteHeadOnScreen
+
+#4.initialize:Execute(
+    InitNoteHead
+    InitNoteTail
+)
+
+#4.touch:Execute(
+    ProcessTouchHead
+    And(
+        InputState
+        NotEqual(InputState Terminated)
+        Equal(TempTouchID InputTouchID)
+        Execute(
+            Set(TemporaryMemory *TempTouchOccupied true)
+            Or(
+                And(
+                    GreaterOr(Subtract(Time InputOffset) NoteTailTime)
+                    IsTouchY
+                    IsTouchXInTailLane
+                    Execute(
+                        Set(EntityMemory *InputState Terminated)
+                        Set(EntitySharedMemory *InputSuccess true)
+                        Set(EntityInput *Judgment JudgeSimple(Subtract(Time InputOffset) NoteTailTime PerfectWindow GreatWindow GoodWindow))
+                        PlayTapEffect
+                        PlayJudgmentSound
+                        true
+                    )
+                )
+                ProcessTouchDiscontinue
+            )
+        )
+    )
+)
+
+#4.updateParallel:Execute(
+    UpdateNoteHeadTimeDistance
+    UpdateNoteTailTimeDistance
+    Or(
+        And(
+            Not(InputState)
+            Greater(Subtract(NoteHeadTimeDistance InputOffset) GoodWindow)
+        )
+        Equal(InputState Terminated)
+        Execute(
+            UpdateNoteTailScale
+            DrawNoteSlide
+            And(
+                IsNoteTailOnScreen
+                DrawNoteTail
+            )
+        )
+    )
+)
+
+
+
+// #5: Slide Release Note
+
+#5.shouldSpawn:IsNoteHeadOnScreen
+
+#5.initialize:Execute(
+    InitNoteHead
+    InitNoteTail
+    InitSimLine
+)
+
+#5.touch:Execute(
+    ProcessTouchHead
+    And(
+        InputState
+        NotEqual(InputState Terminated)
+        Equal(TempTouchID InputTouchID)
+        Execute(
+            Set(TemporaryMemory *TempTouchOccupied true)
+            Or(
+                And(
+                    IsNoteTailInGoodWindow
+                    TempTouchEnded
+                    IsTouchY
+                    IsTouchXInTailLane
+                    Execute(
+                        Set(EntityMemory *InputState Terminated)
+                        Set(EntitySharedMemory *InputSuccess true)
+                        Set(EntityInput *Judgment JudgeSimple(Subtract(TempTouchT InputOffset) NoteTailTime PerfectWindow GreatWindow GoodWindow))
+                        PlayTapEffect
+                        PlayJudgmentSound
+                        true
+                    )
+                )
+                ProcessTouchDiscontinue
+            )
+        )
+    )
+)
+
+#5.updateParallel:Execute(
+    UpdateNoteHeadTimeDistance
+    UpdateNoteTailTimeDistance
+    Or(
+        And(
+            Not(InputState)
+            Greater(Subtract(NoteHeadTimeDistance InputOffset) GoodWindow)
+        )
+        Equal(InputState Terminated)
+        Execute(
+            UpdateNoteTailScale
+            DrawNoteSlide
+            And(
+                IsNoteTailOnScreen
+                DrawNoteTail
+            )
+        )
+    )
+)
+
+
+
+// #6: Slide Flick Note
+
+#6.shouldSpawn:IsNoteHeadOnScreen
+
+#6.initialize:Execute(
+    InitNoteHead
+    InitNoteTail
+    InitSimLine
+)
+
+#6.touch:Execute(
+    ProcessTouchHead
+    And(
+        InputState
+        NotEqual(InputState Terminated)
+        Equal(TempTouchID InputTouchID)
+        Execute(
+            Set(TemporaryMemory *TempTouchOccupied true)
+            Or(
+                If(
+                    Equal(InputState Activated)
+                    And(
+                        IsNoteTailInGoodWindow
+                        IsTouchY
+                        IsTouchXInTailLane
+                        Execute(
+                            Set(EntityMemory *InputState ActivatedNext)
+                            true
+                        )
+                    )
+                    And(
+                        IsNoteTailInGoodWindow
+                        IsTouchY
+                        GreaterOr(TempTouchVR MinVR)
+                        Execute(
+                            Set(EntityMemory *InputState Terminated)
+                            Set(EntitySharedMemory *InputSuccess true)
+                            Set(EntityInput *Judgment JudgeSimple(Subtract(Time InputOffset) NoteTailTime PerfectWindow GreatWindow GoodWindow))
+                            PlayFlickEffect
+                            PlayFlickSound
+                            true
+                        )
+                    )
+                )
+                ProcessTouchDiscontinue
+            )
+        )
+    )
+)
+
+#6.updateParallel:Execute(
+    UpdateNoteHeadTimeDistance
+    UpdateNoteTailTimeDistance
+    Or(
+        And(
+            Not(InputState)
+            Greater(Subtract(NoteHeadTimeDistance InputOffset) GoodWindow)
+        )
+        Equal(InputState Terminated)
+        Execute(
+            UpdateNoteTailScale
+            DrawNoteSlide
+            And(
+                IsNoteTailOnScreen
+                Execute(
+                    DrawNoteTail
+                    DrawNoteTailArrow
+                )
+            )
+        )
+    )
+)
+
+
+
+// #7: Tap Effect
+
+#7.initialize:Execute(
+    Set(EntityMemory *EffectLX1 Subtract(EffectX Multiply(0.5 HalfNoteWidth)))
+    Set(EntityMemory *EffectLX2 Subtract(EffectX Multiply(0.75 HalfNoteWidth)))
+    Set(EntityMemory *EffectLX3 Add(EffectX Multiply(0.75 HalfNoteWidth)))
+    Set(EntityMemory *EffectLX4 Add(EffectX Multiply(0.5 HalfNoteWidth)))
+    Set(EntityMemory *EffectLY Add(-0.63265 Multiply(1.25 NoteWidth)))
+)
+
+#7.updateParallel:Execute(
+    UpdateEffectTimeDistance
+    Or(
+        GreaterOr(EffectTimeDistance 0.6)
+        Execute(
+            DrawEffectC
+
+            Set(EntityMemory *HalfEffectWidth Divide(HalfEffectWidth 1.2))
+            Set(EntityMemory *HalfEffectHeight Multiply(0.7 HalfEffectWidth))
+            UpdateEffectPosition
+            DrawEffectCF
+            DrawEffectL
+        )
+    )
+)
+
+
+
+// #8: Flick Effect
+
+#8.updateParallel:Execute(
+    UpdateEffectTimeDistance
+    Or(
+        GreaterOr(EffectTimeDistance 0.6)
+        Execute(
+            DrawEffectC
+
+            And(
+                Less(EffectTimeDistance 0.2)
+                Execute(
+                    Set(EntityMemory *EffectAlpha 0.5)
+                    Set(
+                        EntityMemory *HalfEffectWidth
+                        Multiply(HalfNoteWidth 1.5 Subtract(0.2 EffectTimeDistance) 5)
+                    )
+                    Set(
+                        EntityMemory *HalfEffectHeight
+                        Multiply(HalfNoteWidth 2 Add(0.4 EffectTimeDistance) 5)
+                    )
+                    UpdateEffectPosition
+                    DrawEffectCB
+                )
+            )
+        )
+    )
+)
+
+
+
+// #9: Empty Tap Effect
+
+#9.initialize:Execute(
+    Set(EntityMemory *EffectLX1 Multiply(Subtract(EffectX 0.5) LaneWidth))
+    Set(EntityMemory *EffectLX3 Multiply(Add(EffectX 0.5) LaneWidth))
+    Set(EntityMemory *EffectLY Add(-0.63265 Multiply(0.5 LaneWidth)))
+)
+
+#9.updateParallel:Execute(
+    UpdateEffectTimeDistance
+    Or(
+        GreaterOr(EffectTimeDistance 0.6)
+        Draw(
+            TextureEffectLB
+            EffectLX1 -0.63265
+            EffectLX1 EffectLY
+            EffectLX3 EffectLY
+            EffectLX3 -0.63265
+            LayerEffectLB
+            Clamp(Divide(Subtract(0.4 EffectTimeDistance) 0.2 2) 0 0.5)
+        )
+    )
+)
+
+
+
+// #10: Sim Line
+
+#10.initialize:Execute(
+    Set(EntityMemory *SimLineTime SimLineTime1)
+    Set(EntityMemory *SimLineX1 Multiply(SimLineLane1 LaneWidth))
+    Set(EntityMemory *SimLineX2 Multiply(SimLineLane2 LaneWidth))
+)
+
+#10.updateParallel:Or(
+    Equal(SimLineState1 Despawned)
+    Equal(SimLineState2 Despawned)
+    And(
+        LessOr(Subtract(SimLineTime Time) NoteScreenTime)
+        Execute(
+            Set(EntityMemory *SimLineTimeDistance Subtract(Time SimLineTime))
+            Set(EntityMemory *SimLineScale Add(0.05 Multiply(0.95 Power(117.39085 Divide(SimLineTimeDistance NoteScreenTime)))))
+            Set(EntityMemory *SimLineScale1 Multiply(NoteBaseY1 SimLineScale))
+            Set(EntityMemory *SimLineScale2 Multiply(NoteBaseY2 SimLineScale))
+            Set(EntityMemory *SimLineY1 Add(1 Multiply(-1.63265 SimLineScale1)))
+            Set(EntityMemory *SimLineY2 Add(1 Multiply(-1.63265 SimLineScale2)))
+            Draw(
+                TextureSimLine
+                Multiply(SimLineScale1 SimLineX1) SimLineY1
+                Multiply(SimLineScale2 SimLineX1) SimLineY2
+                Multiply(SimLineScale2 SimLineX2) SimLineY2
+                Multiply(SimLineScale1 SimLineX2) SimLineY1
+                LayerSimLine
+                1
+            )
+        )
+    )
+)
+
+
+
+// Constants
+
+true:1
+false:0
+
+Waiting:0
+Spawned:1
+Despawned:2
+
+Waiting:0
+Activated:1
+ActivatedNext:2
+Terminated:3
+
+PhaseBegan:1
+PhaseStationary:2
+PhaseMoved:3
+PhaseEnded:4
+
+PerfectWindow:0.05
+GreatWindow:0.1
+GoodWindow:0.15
+
+JudgeYMax:-0.2653
+MinVR:1
+
+MinEffectTime:0.02
+
+LayerNoteMarker:101
+LayerNoteBody:100
+LayerNoteSlide:99
+LayerNoteConnector:98
+LayerSimLine:97
+LayerEffectCF:52
+LayerEffectCB:51
+LayerEffectLB:50
+LayerJudgeLine:1
+LayerLane:0
+
+
+
+// Texture identifiers
+
+TextureNote:0
+TextureJudgeLine:1
+TextureLane:2
+TextureSimLine:3
+TextureFlick:4
+TextureSlide:5
+TextureTick:6
+TextureLong:7
+TextureArrow:8
+TextureEffectCB:9
+TextureEffectCF:10
+TextureEffectLB:11
+
+
+
+// Effect identifiers
+
+EffectMiss:0
+EffectPerfect:1
+EffectGreat:2
+EffectGood:3
+EffectFlick:4
+EffectEmpty:5
+
+
+
+// Block identifiers
+
+LevelMemory:0
+LevelData:1
+LevelOption:2
+LevelTransform:3
+LevelBackground:4
+
+EntityInfoArray:10
+EntityDataArray:11
+EntitySharedMemoryArray:12
+
+EntityInfo:20
+EntityMemory:21
+EntityData:22
+EntityInput:23
+EntitySharedMemory:24
+
+TemporaryMemory:100
+TemporaryData:101
+
+
+
+// Level Memory Layout
+
+*StageAspectRatio:0
+*LaneWidth:1
+*NoteWidth:2
+*NoteHeight:3
+*HalfNoteWidth:4
+*NoteBaseY1:5
+*NoteBaseY2:6
+*NoteScreenTime:7
+
+StageAspectRatio:Get(LevelMemory *StageAspectRatio)
+LaneWidth:Get(LevelMemory *LaneWidth)
+NoteWidth:Get(LevelMemory *NoteWidth)
+NoteHeight:Get(LevelMemory *NoteHeight)
+HalfNoteWidth:Get(LevelMemory *HalfNoteWidth)
+NoteBaseY1:Get(LevelMemory *NoteBaseY1)
+NoteBaseY2:Get(LevelMemory *NoteBaseY2)
+NoteScreenTime:Get(LevelMemory *NoteScreenTime)
+
+
+
+// Level Data Layout
+
+*Time:0
+*DeltaTime:1
+*AspectRatio:2
+*AudioOffset:3
+*InputOffset:4
+
+Time:Get(LevelData *Time)
+DeltaTime:Get(LevelData *DeltaTime)
+AspectRatio:Get(LevelData *AspectRatio)
+AudioOffset:Get(LevelData *AudioOffset)
+InputOffset:Get(LevelData *InputOffset)
+
+
+
+// Level Option Layout
+
+*Offset:0
+*NoteSpeed:1
+*NoteSize:2
+*ConnectorAlpha:3
+*Mirror:4
+*SimLine:5
+*SoundEffect:6
+*StageTilt:7
+*AspectRatioFix:8
+
+Offset:Get(LevelOption *Offset)
+NoteSpeed:Get(LevelOption *NoteSpeed)
+NoteSize:Get(LevelOption *NoteSize)
+ConnectorAlpha:Get(LevelOption *ConnectorAlpha)
+Mirror:Get(LevelOption *Mirror)
+SimLine:Get(LevelOption *SimLine)
+SoundEffect:Get(LevelOption *SoundEffect)
+StageTilt:Get(LevelOption *StageTilt)
+AspectRatioFix:Get(LevelOption *AspectRatioFix)
+
+
+
+// Entity Info Layout
+
+*Index:0
+*Archetype:1
+*State:2
+
+Index:Get(EntityInfo *Index)
+Archetype:Get(EntityInfo *Archetype)
+State:Get(EntityInfo *State)
+
+NoteHeadState:Get(EntityInfoArray Add(NoteHeadInfoOffset *State))
+
+SimLineState1:Get(EntityInfoArray Add(SimLineInfoOffset1 *State))
+SimLineState2:Get(EntityInfoArray Add(SimLineInfoOffset2 *State))
+
+
+
+// Entity Input Layout
+
+*Judgment:0
+
+Judgment:Get(EntityInput *Judgment)
+
+
+
+// Touch Temporary Memory Layout
+
+*TempTouchOccupied:0
+
+TempTouchOccupied:Get(TemporaryMemory *TempTouchOccupied)
+
+
+// Touch Temporary Data Layout
+
+*TempTouchID:0
+*TempTouchStarted:1
+*TempTouchEnded:2
+*TempTouchT:3
+*TempTouchST:4
+*TempTouchX:5
+*TempTouchY:6
+*TempTouchSX:7
+*TempTouchSY:8
+*TempTouchDX:9
+*TempTouchDY:10
+*TempTouchVX:11
+*TempTouchVY:12
+*TempTouchVR:13
+*TempTouchVW:14
+
+TempTouchID:Get(TemporaryData *TempTouchID)
+TempTouchStarted:Get(TemporaryData *TempTouchStarted)
+TempTouchEnded:Get(TemporaryData *TempTouchEnded)
+TempTouchT:Get(TemporaryData *TempTouchT)
+TempTouchST:Get(TemporaryData *TempTouchST)
+TempTouchX:Get(TemporaryData *TempTouchX)
+TempTouchY:Get(TemporaryData *TempTouchY)
+TempTouchSX:Get(TemporaryData *TempTouchSX)
+TempTouchSY:Get(TemporaryData *TempTouchSY)
+TempTouchDX:Get(TemporaryData *TempTouchDX)
+TempTouchDY:Get(TemporaryData *TempTouchDY)
+TempTouchVX:Get(TemporaryData *TempTouchVX)
+TempTouchVY:Get(TemporaryData *TempTouchVY)
+TempTouchVR:Get(TemporaryData *TempTouchVR)
+TempTouchVW:Get(TemporaryData *TempTouchVW)
+
+
+
+// #1 Memory Layout
+
+*JudgeX1:0
+*JudgeX2:1
+*LaneBX-3.5:2
+*LaneBX-2.5:3
+*LaneBX-1.5:4
+*LaneBX-0.5:5
+*LaneBX0.5:6
+*LaneBX1.5:7
+*LaneBX2.5:8
+*LaneBX3.5:9
+*LaneTX-3.5:10
+*LaneTX-2.5:11
+*LaneTX-1.5:12
+*LaneTX-0.5:13
+*LaneTX0.5:14
+*LaneTX1.5:15
+*LaneTX2.5:16
+*LaneTX3.5:17
+*Tilt:18
+
+JudgeX1:Get(EntityMemory *JudgeX1)
+JudgeX2:Get(EntityMemory *JudgeX2)
+LaneBX-3.5:Get(EntityMemory *LaneBX-3.5)
+LaneBX-2.5:Get(EntityMemory *LaneBX-2.5)
+LaneBX-1.5:Get(EntityMemory *LaneBX-1.5)
+LaneBX-0.5:Get(EntityMemory *LaneBX-0.5)
+LaneBX0.5:Get(EntityMemory *LaneBX0.5)
+LaneBX1.5:Get(EntityMemory *LaneBX1.5)
+LaneBX2.5:Get(EntityMemory *LaneBX2.5)
+LaneBX3.5:Get(EntityMemory *LaneBX3.5)
+LaneTX-3.5:Get(EntityMemory *LaneTX-3.5)
+LaneTX-2.5:Get(EntityMemory *LaneTX-2.5)
+LaneTX-1.5:Get(EntityMemory *LaneTX-1.5)
+LaneTX-0.5:Get(EntityMemory *LaneTX-0.5)
+LaneTX0.5:Get(EntityMemory *LaneTX0.5)
+LaneTX1.5:Get(EntityMemory *LaneTX1.5)
+LaneTX2.5:Get(EntityMemory *LaneTX2.5)
+LaneTX3.5:Get(EntityMemory *LaneTX3.5)
+Tilt:Get(EntityMemory *Tilt)
+
+
+
+// Note Class Memory Layout
+
+*InputState:32
+*ActivationTime:33
+*NoteHeadTimeDistance:34
+*NoteHeadScale:35
+*NoteHeadX:36
+*NoteHeadX1:37
+*NoteHeadX2:38
+*NoteHeadY:39
+*NoteTailTimeDistance:40
+*NoteTailScale:41
+*NoteTailScale1:42
+*NoteTailScale2:43
+*NoteTailX:44
+*NoteTailX1:45
+*NoteTailX2:46
+*NoteTailY:47
+*NoteTailY1:48
+*NoteTailY2:49
+
+InputState:Get(EntityMemory *InputState)
+ActivationTime:Get(EntityMemory *ActivationTime)
+NoteHeadTimeDistance:Get(EntityMemory *NoteHeadTimeDistance)
+NoteHeadScale:Get(EntityMemory *NoteHeadScale)
+NoteHeadX:Get(EntityMemory *NoteHeadX)
+NoteHeadX1:Get(EntityMemory *NoteHeadX1)
+NoteHeadX2:Get(EntityMemory *NoteHeadX2)
+NoteHeadY:Get(EntityMemory *NoteHeadY)
+NoteTailTimeDistance:Get(EntityMemory *NoteTailTimeDistance)
+NoteTailScale:Get(EntityMemory *NoteTailScale)
+NoteTailScale1:Get(EntityMemory *NoteTailScale1)
+NoteTailScale2:Get(EntityMemory *NoteTailScale2)
+NoteTailX:Get(EntityMemory *NoteTailX)
+NoteTailX1:Get(EntityMemory *NoteTailX1)
+NoteTailX2:Get(EntityMemory *NoteTailX2)
+NoteTailY:Get(EntityMemory *NoteTailY)
+NoteTailY1:Get(EntityMemory *NoteTailY1)
+NoteTailY2:Get(EntityMemory *NoteTailY2)
+
+
+
+// Note Class Shared Memory Layout
+
+*InputSuccess:0
+*InputTouchID:1
+
+InputSuccess:Get(EntitySharedMemory *InputSuccess)
+InputTouchID:Get(EntitySharedMemory *InputTouchID)
+
+NoteHeadInputSuccess:Get(EntitySharedMemoryArray Add(NoteHeadSharedMemoryOffset *InputSuccess))
+NoteHeadInputTouchID:Get(EntitySharedMemoryArray Add(NoteHeadSharedMemoryOffset *InputTouchID))
+
+
+
+// Note Class Data Layout
+
+*NoteHeadIndex:0
+*NoteTailTime:1
+*NoteTailLane:2
+*NoteSimLineIndex:3
+*NoteTexture:4
+
+NoteHeadIndex:Get(EntityData *NoteHeadIndex)
+NoteTailTime:Get(EntityData *NoteTailTime)
+NoteTailLane:Multiply(Get(EntityData *NoteTailLane) If(Mirror -1 1))
+NoteSimLineIndex:Get(EntityData *NoteSimLineIndex)
+NoteTexture:Get(EntityData *NoteTexture)
+
+NoteHeadInfoOffset:Multiply(NoteHeadIndex 3)
+NoteHeadDataOffset:Multiply(NoteHeadIndex 32)
+NoteHeadSharedMemoryOffset:Multiply(NoteHeadIndex 32)
+
+NoteHeadTime:Get(EntityDataArray Add(NoteHeadDataOffset *NoteTailTime))
+NoteHeadLane:Multiply(Get(EntityDataArray Add(NoteHeadDataOffset *NoteTailLane)) If(Mirror -1 1))
+
+SimLineTime1:Get(EntityDataArray Add(SimLineDataOffset1 *NoteTailTime))
+SimLineTime2:Get(EntityDataArray Add(SimLineDataOffset2 *NoteTailTime))
+SimLineLane1:Multiply(Get(EntityDataArray Add(SimLineDataOffset1 *NoteTailLane)) If(Mirror -1 1))
+SimLineLane2:Multiply(Get(EntityDataArray Add(SimLineDataOffset2 *NoteTailLane)) If(Mirror -1 1))
+
+
+
+// Effect Class Memory Layout
+
+*EffectTimeDistance:32
+*EffectLX1:33
+*EffectLX2:34
+*EffectLX3:35
+*EffectLX4:36
+*EffectLY:37
+*HalfEffectWidth:38
+*HalfEffectHeight:39
+*EffectAlpha:40
+*EffectCX1:41
+*EffectCX2:42
+*EffectCY1:43
+*EffectCY2:44
+
+EffectTimeDistance:Get(EntityMemory *EffectTimeDistance)
+EffectLX1:Get(EntityMemory *EffectLX1)
+EffectLX2:Get(EntityMemory *EffectLX2)
+EffectLX3:Get(EntityMemory *EffectLX3)
+EffectLX4:Get(EntityMemory *EffectLX4)
+EffectLY:Get(EntityMemory *EffectLY)
+HalfEffectWidth:Get(EntityMemory *HalfEffectWidth)
+HalfEffectHeight:Get(EntityMemory *HalfEffectHeight)
+EffectAlpha:Get(EntityMemory *EffectAlpha)
+EffectCX1:Get(EntityMemory *EffectCX1)
+EffectCX2:Get(EntityMemory *EffectCX2)
+EffectCY1:Get(EntityMemory *EffectCY1)
+EffectCY2:Get(EntityMemory *EffectCY2)
+
+
+
+// #7, #8 Memory Layout
+
+*EffectTime:0
+*EffectX:1
+
+EffectTime:Get(EntityMemory *EffectTime)
+EffectX:Get(EntityMemory *EffectX)
+
+
+
+// #10 Memory Layout
+
+*SimLineIndex1:0
+*SimLineIndex2:1
+*SimLineTime:2
+*SimLineX1:3
+*SimLineX2:4
+*SimLineTimeDistance:5
+*SimLineScale:6
+*SimLineScale1:7
+*SimLineScale2:8
+*SimLineY1:9
+*SimLineY2:10
+
+SimLineIndex1:Get(EntityMemory *SimLineIndex1)
+SimLineIndex2:Get(EntityMemory *SimLineIndex2)
+SimLineTime:Get(EntityMemory *SimLineTime)
+SimLineX1:Get(EntityMemory *SimLineX1)
+SimLineX2:Get(EntityMemory *SimLineX2)
+SimLineTimeDistance:Get(EntityMemory *SimLineTimeDistance)
+SimLineScale:Get(EntityMemory *SimLineScale)
+SimLineScale1:Get(EntityMemory *SimLineScale1)
+SimLineScale2:Get(EntityMemory *SimLineScale2)
+SimLineY1:Get(EntityMemory *SimLineY1)
+SimLineY2:Get(EntityMemory *SimLineY2)
+
+SimLineInfoOffset1:Multiply(SimLineIndex1 3)
+SimLineInfoOffset2:Multiply(SimLineIndex2 3)
+SimLineDataOffset1:Multiply(SimLineIndex1 32)
+SimLineDataOffset2:Multiply(SimLineIndex2 32)
