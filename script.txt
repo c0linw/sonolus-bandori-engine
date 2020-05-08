@@ -1,6 +1,6 @@
 //
 // Bandori Engine
-// For Sonolus 0.2.0.0
+// For Sonolus 0.3.0.0
 //
 // A recreation of BanG Dream! Girls Band Party engine
 // By Burrito
@@ -52,8 +52,7 @@ ProcessTouchHead:And(
         )
         And(
             Equal(NoteHeadState Despawned)
-            LessOr(Subtract(NoteHeadTime Subtract(Time InputOffset)) GoodWindow)
-            TempTouchStarted
+            GreaterOr(Subtract(Time InputOffset) NoteHeadTime)
             Not(TempTouchOccupied)
             IsTouchY
             GreaterOr(TempTouchX Subtract(NoteHeadX LaneWidth))
@@ -71,6 +70,14 @@ ProcessTouchDiscontinue:And(
     Or(
         TempTouchEnded
         Greater(TempTouchY JudgeYMax)
+        Greater(Subtract(Time InputOffset NoteTailTime) GoodWindow)
+    )
+    Set(EntityMemory *InputState Terminated)
+)
+
+ProcessFlickDiscontinue:And(
+    Or(
+        TempTouchEnded
         Greater(Subtract(Time InputOffset NoteTailTime) GoodWindow)
     )
     Set(EntityMemory *InputState Terminated)
@@ -119,7 +126,7 @@ DrawNoteSlide:And(
                 Set(EntityMemory *NoteHeadScale 1)
                 Set(EntityMemory *NoteHeadY -0.63265)
 
-                Set(EntityMemory *NoteHeadX Multiply(LaneWidth Lerp(NoteHeadLane NoteTailLane UnlerpClamped(NoteHeadTime NoteTailTime Time))))
+                Set(EntityMemory *NoteHeadX Multiply(LaneWidth RemapClamped(NoteHeadTime NoteTailTime NoteHeadLane NoteTailLane Time)))
 
                 Set(EntityMemory *NoteHeadX1 Subtract(NoteHeadX HalfNoteWidth))
                 Set(EntityMemory *NoteHeadX2 Add(NoteHeadX HalfNoteWidth))
@@ -158,12 +165,20 @@ PlayTapEffect:Spawn(
     7
     Time
     NoteTailX
+    NoteEffectCB
+    NoteEffectCF
+    NoteEffectLB
+    NoteEffectLF
 )
 
 PlayFlickEffect:Spawn(
     8
     Time
     NoteTailX
+    NoteEffectCB
+    NoteEffectCF
+    NoteEffectLB
+    NoteEffectLF
 )
 
 PlayJudgmentSound:And(
@@ -216,7 +231,7 @@ UpdateEffectPosition:Execute(
 )
 
 DrawEffectCB:Draw(
-    TextureEffectCB
+    EffectCB
     EffectCX1 EffectCY1
     EffectCX1 EffectCY2
     EffectCX2 EffectCY2
@@ -226,7 +241,7 @@ DrawEffectCB:Draw(
 )
 
 DrawEffectCF:Draw(
-    TextureEffectCF
+    EffectCF
     EffectCX1 EffectCY1
     EffectCX1 EffectCY2
     EffectCX2 EffectCY2
@@ -235,14 +250,47 @@ DrawEffectCF:Draw(
     EffectAlpha
 )
 
-DrawEffectL:Draw(
-    TextureEffectLB
+DrawEffectL:Execute(
+    DrawEffectLF
+    DrawEffectLB
+)
+
+DrawEffectLF:Execute(
+    Set(EntityMemory *EffectAlpha Clamp(Divide(Subtract(0.4 EffectTimeDistance) 0.2 2) 0 0.5))
+    Set(
+        EntityMemory *EffectLY2
+        Add(
+            -0.63265
+            Multiply(
+                HalfNoteWidth 4
+                If(
+                    Less(EffectTimeDistance 0.5)
+                    Multiply(4 Subtract(EffectTimeDistance Multiply(EffectTimeDistance EffectTimeDistance)))
+                    1
+                )
+            )
+        )
+    )
+
+    Draw(
+        EffectLF
+        EffectLX1 -0.63265
+        EffectLX2 EffectLY2
+        EffectLX3 EffectLY2
+        EffectLX4 -0.63265
+        LayerEffectLF
+        EffectAlpha
+    )
+)
+
+DrawEffectLB:Draw(
+    EffectLB
     EffectLX1 -0.63265
-    EffectLX2 EffectLY
-    EffectLX3 EffectLY
+    EffectLX2 EffectLY1
+    EffectLX3 EffectLY1
     EffectLX4 -0.63265
     LayerEffectLB
-    Clamp(Divide(Subtract(0.4 EffectTimeDistance) 0.2 2) 0 0.5)
+    EffectAlpha
 )
 
 
@@ -270,6 +318,7 @@ DrawEffectL:Draw(
 #1.initialize:Execute(
     Set(EntityMemory *JudgeX1 Multiply(-1 AspectRatio))
     Set(EntityMemory *JudgeX2 Multiply(1 AspectRatio))
+    Set(EntityMemory *LaneBXL Multiply(-3.75 LaneWidth))
     Set(EntityMemory *LaneBX-3.5 Multiply(-3.5 LaneWidth))
     Set(EntityMemory *LaneBX-2.5 Multiply(-2.5 LaneWidth))
     Set(EntityMemory *LaneBX-1.5 Multiply(-1.5 LaneWidth))
@@ -278,6 +327,8 @@ DrawEffectL:Draw(
     Set(EntityMemory *LaneBX1.5 Multiply(1.5 LaneWidth))
     Set(EntityMemory *LaneBX2.5 Multiply(2.5 LaneWidth))
     Set(EntityMemory *LaneBX3.5 Multiply(3.5 LaneWidth))
+    Set(EntityMemory *LaneBXR Multiply(3.75 LaneWidth))
+    Set(EntityMemory *LaneTXL Multiply(0.05 LaneBXL))
     Set(EntityMemory *LaneTX-3.5 Multiply(0.05 LaneBX-3.5))
     Set(EntityMemory *LaneTX-2.5 Multiply(0.05 LaneBX-2.5))
     Set(EntityMemory *LaneTX-1.5 Multiply(0.05 LaneBX-1.5))
@@ -286,6 +337,7 @@ DrawEffectL:Draw(
     Set(EntityMemory *LaneTX1.5 Multiply(0.05 LaneBX1.5))
     Set(EntityMemory *LaneTX2.5 Multiply(0.05 LaneBX2.5))
     Set(EntityMemory *LaneTX3.5 Multiply(0.05 LaneBX3.5))
+    Set(EntityMemory *LaneTXR Multiply(0.05 LaneBXR))
 )
 
 #1.updateSequential:And(
@@ -299,11 +351,20 @@ DrawEffectL:Draw(
 #1.updateParallel:Execute(
     Draw(
         TextureJudgeLine
-        JudgeX1 -0.64265
-        JudgeX1 -0.62265
-        JudgeX2 -0.62265
-        JudgeX2 -0.64265
+        JudgeX1 -0.65265
+        JudgeX1 -0.61265
+        JudgeX2 -0.61265
+        JudgeX2 -0.65265
         LayerJudgeLine
+        1
+    )
+    Draw(
+        TextureStageL
+        LaneBXL -0.63265
+        LaneTXL 0.91837
+        LaneTX-3.5 0.91837
+        LaneBX-3.5 -0.63265
+        LayerStage
         1
     )
     Draw(
@@ -312,7 +373,7 @@ DrawEffectL:Draw(
         LaneTX-3.5 0.91837
         LaneTX-2.5 0.91837
         LaneBX-2.5 -0.63265
-        LayerLane
+        LayerStage
         1
     )
     Draw(
@@ -321,7 +382,7 @@ DrawEffectL:Draw(
         LaneTX-2.5 0.91837
         LaneTX-1.5 0.91837
         LaneBX-1.5 -0.63265
-        LayerLane
+        LayerStage
         1
     )
     Draw(
@@ -330,7 +391,7 @@ DrawEffectL:Draw(
         LaneTX-1.5 0.91837
         LaneTX-0.5 0.91837
         LaneBX-0.5 -0.63265
-        LayerLane
+        LayerStage
         1
     )
     Draw(
@@ -339,7 +400,7 @@ DrawEffectL:Draw(
         LaneTX-0.5 0.91837
         LaneTX0.5 0.91837
         LaneBX0.5 -0.63265
-        LayerLane
+        LayerStage
         1
     )
     Draw(
@@ -348,7 +409,7 @@ DrawEffectL:Draw(
         LaneTX0.5 0.91837
         LaneTX1.5 0.91837
         LaneBX1.5 -0.63265
-        LayerLane
+        LayerStage
         1
     )
     Draw(
@@ -357,7 +418,7 @@ DrawEffectL:Draw(
         LaneTX1.5 0.91837
         LaneTX2.5 0.91837
         LaneBX2.5 -0.63265
-        LayerLane
+        LayerStage
         1
     )
     Draw(
@@ -366,7 +427,16 @@ DrawEffectL:Draw(
         LaneTX2.5 0.91837
         LaneTX3.5 0.91837
         LaneBX3.5 -0.63265
-        LayerLane
+        LayerStage
+        1
+    )
+    Draw(
+        TextureStageR
+        LaneBX3.5 -0.63265
+        LaneTX3.5 0.91837
+        LaneTXR 0.91837
+        LaneBXR -0.63265
+        LayerStage
         1
     )
 )
@@ -553,7 +623,7 @@ DrawEffectL:Draw(
                         true
                     )
                 )
-                ProcessTouchDiscontinue
+                ProcessFlickDiscontinue
             )
         )
     )
@@ -738,7 +808,7 @@ DrawEffectL:Draw(
                         )
                     )
                 )
-                ProcessTouchDiscontinue
+                ProcessFlickDiscontinue
             )
         )
     )
@@ -776,7 +846,7 @@ DrawEffectL:Draw(
     Set(EntityMemory *EffectLX2 Subtract(EffectX Multiply(0.75 HalfNoteWidth)))
     Set(EntityMemory *EffectLX3 Add(EffectX Multiply(0.75 HalfNoteWidth)))
     Set(EntityMemory *EffectLX4 Add(EffectX Multiply(0.5 HalfNoteWidth)))
-    Set(EntityMemory *EffectLY Add(-0.63265 Multiply(1.25 NoteWidth)))
+    Set(EntityMemory *EffectLY1 Add(-0.63265 Multiply(1.25 NoteWidth)))
 )
 
 #7.updateParallel:Execute(
@@ -785,11 +855,6 @@ DrawEffectL:Draw(
         GreaterOr(EffectTimeDistance 0.6)
         Execute(
             DrawEffectC
-
-            Set(EntityMemory *HalfEffectWidth Divide(HalfEffectWidth 1.2))
-            Set(EntityMemory *HalfEffectHeight Multiply(0.7 HalfEffectWidth))
-            UpdateEffectPosition
-            DrawEffectCF
             DrawEffectL
         )
     )
@@ -799,12 +864,20 @@ DrawEffectL:Draw(
 
 // #8: Flick Effect
 
+#8.initialize:Execute(
+    Set(EntityMemory *EffectLX1 Subtract(EffectX Multiply(0.5 HalfNoteWidth)))
+    Set(EntityMemory *EffectLX2 Subtract(EffectX Multiply(0.75 HalfNoteWidth)))
+    Set(EntityMemory *EffectLX3 Add(EffectX Multiply(0.75 HalfNoteWidth)))
+    Set(EntityMemory *EffectLX4 Add(EffectX Multiply(0.5 HalfNoteWidth)))
+)
+
 #8.updateParallel:Execute(
     UpdateEffectTimeDistance
     Or(
         GreaterOr(EffectTimeDistance 0.6)
         Execute(
             DrawEffectC
+            DrawEffectLF
 
             And(
                 Less(EffectTimeDistance 0.2)
@@ -833,21 +906,49 @@ DrawEffectL:Draw(
 #9.initialize:Execute(
     Set(EntityMemory *EffectLX1 Multiply(Subtract(EffectX 0.5) LaneWidth))
     Set(EntityMemory *EffectLX3 Multiply(Add(EffectX 0.5) LaneWidth))
-    Set(EntityMemory *EffectLY Add(-0.63265 Multiply(0.5 LaneWidth)))
+    Set(EntityMemory *EffectLY1 Add(-0.63265 Multiply(0.5 LaneWidth)))
 )
 
 #9.updateParallel:Execute(
     UpdateEffectTimeDistance
     Or(
         GreaterOr(EffectTimeDistance 0.6)
-        Draw(
-            TextureEffectLB
-            EffectLX1 -0.63265
-            EffectLX1 EffectLY
-            EffectLX3 EffectLY
-            EffectLX3 -0.63265
-            LayerEffectLB
-            Clamp(Divide(Subtract(0.4 EffectTimeDistance) 0.2 2) 0 0.5)
+        Execute(
+            Set(EntityMemory *EffectAlpha Clamp(Divide(Subtract(0.4 EffectTimeDistance) 0.2 2) 0 0.5))
+            Set(
+                EntityMemory *EffectLY2
+                Add(
+                    -0.63265
+                    Multiply(
+                        LaneWidth
+                        If(
+                            Less(EffectTimeDistance 0.5)
+                            Multiply(4 Subtract(EffectTimeDistance Multiply(EffectTimeDistance EffectTimeDistance)))
+                            1
+                        )
+                    )
+                )
+            )
+
+            Draw(
+                TextureEffectLF
+                EffectLX1 -0.63265
+                EffectLX1 EffectLY2
+                EffectLX3 EffectLY2
+                EffectLX3 -0.63265
+                LayerEffectLF
+                EffectAlpha
+            )
+
+            Draw(
+                TextureEffectLB
+                EffectLX1 -0.63265
+                EffectLX1 EffectLY1
+                EffectLX3 EffectLY1
+                EffectLX3 -0.63265
+                LayerEffectLB
+                EffectAlpha
+            )
         )
     )
 )
@@ -913,7 +1014,7 @@ GreatWindow:0.1
 GoodWindow:0.15
 
 JudgeYMax:-0.2653
-MinVR:1
+MinVR:1.5
 
 MinEffectTime:0.02
 
@@ -922,28 +1023,27 @@ LayerNoteBody:100
 LayerNoteSlide:99
 LayerNoteConnector:98
 LayerSimLine:97
+LayerEffectLF:53
 LayerEffectCF:52
-LayerEffectCB:51
-LayerEffectLB:50
+LayerEffectLB:51
+LayerEffectCB:50
 LayerJudgeLine:1
-LayerLane:0
+LayerStage:0
 
 
 
 // Texture identifiers
 
-TextureNote:0
-TextureJudgeLine:1
-TextureLane:2
-TextureSimLine:3
-TextureFlick:4
-TextureSlide:5
-TextureTick:6
-TextureLong:7
-TextureArrow:8
-TextureEffectCB:9
-TextureEffectCF:10
-TextureEffectLB:11
+TextureJudgeLine:41000
+TextureLane:40100
+TextureSimLine:12006
+TextureSlide:1002
+TextureLong:11002
+TextureArrow:21001
+TextureEffectLB:33000
+TextureEffectLF:34000
+TextureStageL:40001
+TextureStageR:40002
 
 
 
@@ -1022,16 +1122,18 @@ InputOffset:Get(LevelData *InputOffset)
 // Level Option Layout
 
 *Offset:0
-*NoteSpeed:1
-*NoteSize:2
-*ConnectorAlpha:3
-*Mirror:4
-*SimLine:5
-*SoundEffect:6
-*StageTilt:7
-*AspectRatioFix:8
+*Speed:1
+*NoteSpeed:2
+*NoteSize:3
+*ConnectorAlpha:4
+*Mirror:5
+*SimLine:6
+*SoundEffect:7
+*StageTilt:8
+*AspectRatioFix:9
 
 Offset:Get(LevelOption *Offset)
+Speed:Get(LevelOption *Speed)
 NoteSpeed:Get(LevelOption *NoteSpeed)
 NoteSize:Get(LevelOption *NoteSize)
 ConnectorAlpha:Get(LevelOption *ConnectorAlpha)
@@ -1115,26 +1217,31 @@ TempTouchVW:Get(TemporaryData *TempTouchVW)
 
 *JudgeX1:0
 *JudgeX2:1
-*LaneBX-3.5:2
-*LaneBX-2.5:3
-*LaneBX-1.5:4
-*LaneBX-0.5:5
-*LaneBX0.5:6
-*LaneBX1.5:7
-*LaneBX2.5:8
-*LaneBX3.5:9
-*LaneTX-3.5:10
-*LaneTX-2.5:11
-*LaneTX-1.5:12
-*LaneTX-0.5:13
-*LaneTX0.5:14
-*LaneTX1.5:15
-*LaneTX2.5:16
-*LaneTX3.5:17
-*Tilt:18
+*LaneBXL:2
+*LaneBX-3.5:3
+*LaneBX-2.5:4
+*LaneBX-1.5:5
+*LaneBX-0.5:6
+*LaneBX0.5:7
+*LaneBX1.5:8
+*LaneBX2.5:9
+*LaneBX3.5:10
+*LaneBXR:11
+*LaneTXL:12
+*LaneTX-3.5:13
+*LaneTX-2.5:14
+*LaneTX-1.5:15
+*LaneTX-0.5:16
+*LaneTX0.5:17
+*LaneTX1.5:18
+*LaneTX2.5:19
+*LaneTX3.5:20
+*LaneTXR:21
+*Tilt:22
 
 JudgeX1:Get(EntityMemory *JudgeX1)
 JudgeX2:Get(EntityMemory *JudgeX2)
+LaneBXL:Get(EntityMemory *LaneBXL)
 LaneBX-3.5:Get(EntityMemory *LaneBX-3.5)
 LaneBX-2.5:Get(EntityMemory *LaneBX-2.5)
 LaneBX-1.5:Get(EntityMemory *LaneBX-1.5)
@@ -1143,6 +1250,8 @@ LaneBX0.5:Get(EntityMemory *LaneBX0.5)
 LaneBX1.5:Get(EntityMemory *LaneBX1.5)
 LaneBX2.5:Get(EntityMemory *LaneBX2.5)
 LaneBX3.5:Get(EntityMemory *LaneBX3.5)
+LaneBXR:Get(EntityMemory *LaneBXR)
+LaneTXL:Get(EntityMemory *LaneTXL)
 LaneTX-3.5:Get(EntityMemory *LaneTX-3.5)
 LaneTX-2.5:Get(EntityMemory *LaneTX-2.5)
 LaneTX-1.5:Get(EntityMemory *LaneTX-1.5)
@@ -1151,6 +1260,7 @@ LaneTX0.5:Get(EntityMemory *LaneTX0.5)
 LaneTX1.5:Get(EntityMemory *LaneTX1.5)
 LaneTX2.5:Get(EntityMemory *LaneTX2.5)
 LaneTX3.5:Get(EntityMemory *LaneTX3.5)
+LaneTXR:Get(EntityMemory *LaneTXR)
 Tilt:Get(EntityMemory *Tilt)
 
 
@@ -1217,22 +1327,30 @@ NoteHeadInputTouchID:Get(EntitySharedMemoryArray Add(NoteHeadSharedMemoryOffset 
 *NoteTailLane:2
 *NoteSimLineIndex:3
 *NoteTexture:4
+*NoteEffectCB:5
+*NoteEffectCF:6
+*NoteEffectLB:7
+*NoteEffectLF:8
 
 NoteHeadIndex:Get(EntityData *NoteHeadIndex)
-NoteTailTime:Get(EntityData *NoteTailTime)
+NoteTailTime:Divide(Get(EntityData *NoteTailTime) Speed)
 NoteTailLane:Multiply(Get(EntityData *NoteTailLane) If(Mirror -1 1))
 NoteSimLineIndex:Get(EntityData *NoteSimLineIndex)
 NoteTexture:Get(EntityData *NoteTexture)
+NoteEffectCB:Get(EntityData *NoteEffectCB)
+NoteEffectCF:Get(EntityData *NoteEffectCF)
+NoteEffectLB:Get(EntityData *NoteEffectLB)
+NoteEffectLF:Get(EntityData *NoteEffectLF)
 
 NoteHeadInfoOffset:Multiply(NoteHeadIndex 3)
 NoteHeadDataOffset:Multiply(NoteHeadIndex 32)
 NoteHeadSharedMemoryOffset:Multiply(NoteHeadIndex 32)
 
-NoteHeadTime:Get(EntityDataArray Add(NoteHeadDataOffset *NoteTailTime))
+NoteHeadTime:Divide(Get(EntityDataArray Add(NoteHeadDataOffset *NoteTailTime)) Speed)
 NoteHeadLane:Multiply(Get(EntityDataArray Add(NoteHeadDataOffset *NoteTailLane)) If(Mirror -1 1))
 
-SimLineTime1:Get(EntityDataArray Add(SimLineDataOffset1 *NoteTailTime))
-SimLineTime2:Get(EntityDataArray Add(SimLineDataOffset2 *NoteTailTime))
+SimLineTime1:Divide(Get(EntityDataArray Add(SimLineDataOffset1 *NoteTailTime)) Speed)
+SimLineTime2:Divide(Get(EntityDataArray Add(SimLineDataOffset2 *NoteTailTime)) Speed)
 SimLineLane1:Multiply(Get(EntityDataArray Add(SimLineDataOffset1 *NoteTailLane)) If(Mirror -1 1))
 SimLineLane2:Multiply(Get(EntityDataArray Add(SimLineDataOffset2 *NoteTailLane)) If(Mirror -1 1))
 
@@ -1245,21 +1363,23 @@ SimLineLane2:Multiply(Get(EntityDataArray Add(SimLineDataOffset2 *NoteTailLane))
 *EffectLX2:34
 *EffectLX3:35
 *EffectLX4:36
-*EffectLY:37
-*HalfEffectWidth:38
-*HalfEffectHeight:39
-*EffectAlpha:40
-*EffectCX1:41
-*EffectCX2:42
-*EffectCY1:43
-*EffectCY2:44
+*EffectLY1:37
+*EffectLY2:38
+*HalfEffectWidth:39
+*HalfEffectHeight:40
+*EffectAlpha:41
+*EffectCX1:42
+*EffectCX2:43
+*EffectCY1:44
+*EffectCY2:45
 
 EffectTimeDistance:Get(EntityMemory *EffectTimeDistance)
 EffectLX1:Get(EntityMemory *EffectLX1)
 EffectLX2:Get(EntityMemory *EffectLX2)
 EffectLX3:Get(EntityMemory *EffectLX3)
 EffectLX4:Get(EntityMemory *EffectLX4)
-EffectLY:Get(EntityMemory *EffectLY)
+EffectLY1:Get(EntityMemory *EffectLY1)
+EffectLY2:Get(EntityMemory *EffectLY2)
 HalfEffectWidth:Get(EntityMemory *HalfEffectWidth)
 HalfEffectHeight:Get(EntityMemory *HalfEffectHeight)
 EffectAlpha:Get(EntityMemory *EffectAlpha)
@@ -1274,9 +1394,17 @@ EffectCY2:Get(EntityMemory *EffectCY2)
 
 *EffectTime:0
 *EffectX:1
+*EffectCB:2
+*EffectCF:3
+*EffectLB:4
+*EffectLF:5
 
 EffectTime:Get(EntityMemory *EffectTime)
 EffectX:Get(EntityMemory *EffectX)
+EffectCB:Get(EntityMemory *EffectCB)
+EffectCF:Get(EntityMemory *EffectCF)
+EffectLB:Get(EntityMemory *EffectLB)
+EffectLF:Get(EntityMemory *EffectLF)
 
 
 
