@@ -612,7 +612,6 @@ DrawEffectLB:Draw(
             Or(
                 And(
                     IsNoteTailInGoodWindow
-                    IsTouchY
                     GreaterOr(TempTouchVR MinVR)
                     Execute(
                         Set(EntityMemory *InputState Terminated)
@@ -783,29 +782,26 @@ DrawEffectLB:Draw(
         Execute(
             Set(TemporaryMemory *TempTouchOccupied true)
             Or(
-                If(
+                And(
                     Equal(InputState Activated)
-                    And(
-                        IsNoteTailInGoodWindow
-                        IsTouchY
-                        IsTouchXInTailLane
-                        Execute(
-                            Set(EntityMemory *InputState ActivatedNext)
-                            true
-                        )
+                    GreaterOr(Subtract(Time InputOffset) NoteTailTime)
+                    IsTouchY
+                    IsTouchXInTailLane
+                    Execute(
+                        Set(EntityMemory *InputState ActivatedNext)
+                        true
                     )
-                    And(
-                        IsNoteTailInGoodWindow
-                        IsTouchY
-                        GreaterOr(TempTouchVR MinVR)
-                        Execute(
-                            Set(EntityMemory *InputState Terminated)
-                            Set(EntitySharedMemory *InputSuccess true)
-                            Set(EntityInput *Judgment JudgeSimple(Subtract(Time InputOffset) NoteTailTime PerfectWindow GreatWindow GoodWindow))
-                            PlayFlickEffect
-                            PlayFlickSound
-                            true
-                        )
+                )
+                And(
+                    Equal(InputState ActivatedNext)
+                    GreaterOr(TempTouchVR MinVR)
+                    Execute(
+                        Set(EntityMemory *InputState Terminated)
+                        Set(EntitySharedMemory *InputSuccess true)
+                        Set(EntityInput *Judgment JudgeSimple(Subtract(Time InputOffset) NoteTailTime PerfectWindow GreatWindow GoodWindow))
+                        PlayFlickEffect
+                        PlayFlickSound
+                        true
                     )
                 )
                 ProcessFlickDiscontinue
