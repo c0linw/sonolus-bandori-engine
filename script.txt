@@ -1009,7 +1009,7 @@ PerfectWindow:0.05
 GreatWindow:0.1
 GoodWindow:0.15
 
-JudgeYMax:-0.2653
+JudgeYMax:0
 MinVR:1.5
 
 MinEffectTime:0.02
