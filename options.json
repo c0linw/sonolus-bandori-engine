@@ -66,6 +66,18 @@
         "def": 1
     },
     {
+        "name": "#HIT_EFFECT",
+        "scope": "Bandori",
+        "type": "toggle",
+        "def": 1
+    },
+    {
+        "name": "#LANE_EFFECT",
+        "scope": "Bandori",
+        "type": "toggle",
+        "def": 1
+    },
+    {
         "name": "#STAGE_TILT",
         "scope": "Bandori",
         "type": "toggle",

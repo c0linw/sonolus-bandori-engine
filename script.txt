@@ -161,24 +161,30 @@ DrawNoteSlide:And(
     )
 )
 
-PlayTapEffect:Spawn(
-    7
-    Time
-    NoteTailX
-    NoteEffectCB
-    NoteEffectCF
-    NoteEffectLB
-    NoteEffectLF
+PlayTapEffect:And(
+    HitEffect
+    Spawn(
+        7
+        Time
+        NoteTailX
+        NoteEffectCB
+        NoteEffectCF
+        NoteEffectLB
+        NoteEffectLF
+    )
 )
 
-PlayFlickEffect:Spawn(
-    8
-    Time
-    NoteTailX
-    NoteEffectCB
-    NoteEffectCF
-    NoteEffectLB
-    NoteEffectLF
+PlayFlickEffect:And(
+    HitEffect
+    Spawn(
+        8
+        Time
+        NoteTailX
+        NoteEffectCB
+        NoteEffectCF
+        NoteEffectLB
+        NoteEffectLF
+    )
 )
 
 PlayJudgmentSound:And(
@@ -366,7 +372,6 @@ DrawEffectLB:Draw(
     Set(EntityMemory *Tilt Add(Tilt TempTouchX))
     And(
         TempTouchStarted
-        Not(TempTouchOccupied)
         IsTouchY
         Execute(
             Set(EntityMemory *Looper 0)
@@ -376,11 +381,30 @@ DrawEffectLB:Draw(
                     GreaterOr(TempTouchX GetShifted(EntityMemory *LaneBX Looper))
                     LessOr(TempTouchX GetShifted(EntityMemory *LaneBX Add(Looper 1)))
                     Execute(
-                        PlayEmptySound
-                        Spawn(
-                            9
-                            Time
-                            Subtract(Looper 3)
+                        And(
+                            Not(TempTouchOccupied)
+                            Execute(
+                                PlayEmptySound
+                                And(
+                                    HitEffect
+                                    Spawn(
+                                        9
+                                        Time
+                                        Subtract(Looper 3)
+                                    )
+                                )
+                            )
+                        )
+                        And(
+                            LaneEffect
+                            Spawn(
+                                11
+                                Time
+                                GetShifted(EntityMemory *LaneBX Looper)
+                                GetShifted(EntityMemory *LaneTX Looper)
+                                GetShifted(EntityMemory *LaneTX Add(Looper 1))
+                                GetShifted(EntityMemory *LaneBX Add(Looper 1))
+                            )
                         )
                     )
                 )
@@ -827,6 +851,26 @@ DrawEffectLB:Draw(
 
 
 
+// #11: Lane Effect
+
+#11.updateParallel:Execute(
+    UpdateEffectTimeDistance
+    Or(
+        GreaterOr(EffectTimeDistance 0.2)
+        Draw(
+            TextureEffectLB
+            LaneEffectX1 -0.63265
+            LaneEffectX2 0.91837
+            LaneEffectX3 0.91837
+            LaneEffectX4 -0.63265
+            LayerLaneEffect
+            Subtract(1 Divide(EffectTimeDistance 0.2))
+        )
+    )
+)
+
+
+
 // Constants
 
 true:1
@@ -864,7 +908,8 @@ LayerEffectLF:53
 LayerEffectCF:52
 LayerEffectLB:51
 LayerEffectCB:50
-LayerJudgeLine:1
+LayerJudgeLine:2
+LayerLaneEffect:1
 LayerStage:0
 
 
@@ -966,8 +1011,10 @@ InputOffset:Get(LevelData *InputOffset)
 *Mirror:5
 *SimLine:6
 *SoundEffect:7
-*StageTilt:8
-*AspectRatioFix:9
+*HitEffect:8
+*LaneEffect:9
+*StageTilt:10
+*AspectRatioFix:11
 
 Offset:Get(LevelOption *Offset)
 Speed:Get(LevelOption *Speed)
@@ -977,6 +1024,8 @@ ConnectorAlpha:Get(LevelOption *ConnectorAlpha)
 Mirror:Get(LevelOption *Mirror)
 SimLine:Get(LevelOption *SimLine)
 SoundEffect:Get(LevelOption *SoundEffect)
+HitEffect:Get(LevelOption *HitEffect)
+LaneEffect:Get(LevelOption *LaneEffect)
 StageTilt:Get(LevelOption *StageTilt)
 AspectRatioFix:Get(LevelOption *AspectRatioFix)
 
@@ -1199,7 +1248,7 @@ EffectCY2:Get(EntityMemory *EffectCY2)
 
 
 
-// #7, #8 Memory Layout
+// #7, #8, #11 Memory Layout
 
 *EffectTime:0
 *EffectX:1
@@ -1247,3 +1296,17 @@ SimLineInfoOffset1:Multiply(SimLineIndex1 3)
 SimLineInfoOffset2:Multiply(SimLineIndex2 3)
 SimLineDataOffset1:Multiply(SimLineIndex1 32)
 SimLineDataOffset2:Multiply(SimLineIndex2 32)
+
+
+
+// #11 Memory Layout
+
+*LaneEffectX1:1
+*LaneEffectX2:2
+*LaneEffectX3:3
+*LaneEffectX4:4
+
+LaneEffectX1:Get(EntityMemory *LaneEffectX1)
+LaneEffectX2:Get(EntityMemory *LaneEffectX2)
+LaneEffectX3:Get(EntityMemory *LaneEffectX3)
+LaneEffectX4:Get(EntityMemory *LaneEffectX4)
