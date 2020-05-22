@@ -1,6 +1,6 @@
 //
 // Bandori Engine
-// For Sonolus 0.3.0.0
+// For Sonolus 0.3.2.0
 //
 // A recreation of BanG Dream! Girls Band Party engine
 // By Burrito
@@ -203,19 +203,9 @@ PlayEmptySound:And(
 UpdateEffectTimeDistance:Set(EntityMemory *EffectTimeDistance Subtract(Time EffectTime))
 
 DrawEffectC:Execute(
-    Set(EntityMemory *EffectAlpha Clamp(Divide(Subtract(0.6 EffectTimeDistance) 0.3 2) 0 0.5))
+    Set(EntityMemory *EffectAlpha Divide(Subtract(1 EaseInCubic(Divide(EffectTimeDistance 0.6))) 2))
 
-    Set(
-        EntityMemory *HalfEffectWidth
-        Multiply(
-            HalfNoteWidth 2
-            If(
-                Less(EffectTimeDistance 0.5)
-                Multiply(4 Subtract(EffectTimeDistance Multiply(EffectTimeDistance EffectTimeDistance)))
-                1
-            )
-        )
-    )
+    Set(EntityMemory *HalfEffectWidth Multiply(HalfNoteWidth 2 EaseOutCubic(Divide(EffectTimeDistance 0.6))))
     Set(EntityMemory *HalfEffectHeight Multiply(0.7 HalfEffectWidth))
     UpdateEffectPosition
 
@@ -256,21 +246,8 @@ DrawEffectL:Execute(
 )
 
 DrawEffectLF:Execute(
-    Set(EntityMemory *EffectAlpha Clamp(Divide(Subtract(0.4 EffectTimeDistance) 0.2 2) 0 0.5))
-    Set(
-        EntityMemory *EffectLY2
-        Add(
-            -0.63265
-            Multiply(
-                HalfNoteWidth 4
-                If(
-                    Less(EffectTimeDistance 0.5)
-                    Multiply(4 Subtract(EffectTimeDistance Multiply(EffectTimeDistance EffectTimeDistance)))
-                    1
-                )
-            )
-        )
-    )
+    Set(EntityMemory *EffectAlpha Divide(Subtract(1 EaseInOutCubic(Divide(EffectTimeDistance 0.6))) 2))
+    Set(EntityMemory *EffectLY2 Add(-0.63265 Multiply(HalfNoteWidth 4 EaseOutCubic(Divide(EffectTimeDistance 0.6)))))
 
     Draw(
         EffectLF
@@ -318,26 +295,18 @@ DrawEffectLB:Draw(
 #1.initialize:Execute(
     Set(EntityMemory *JudgeX1 Multiply(-1 AspectRatio))
     Set(EntityMemory *JudgeX2 Multiply(1 AspectRatio))
-    Set(EntityMemory *LaneBXL Multiply(-3.75 LaneWidth))
-    Set(EntityMemory *LaneBX-3.5 Multiply(-3.5 LaneWidth))
-    Set(EntityMemory *LaneBX-2.5 Multiply(-2.5 LaneWidth))
-    Set(EntityMemory *LaneBX-1.5 Multiply(-1.5 LaneWidth))
-    Set(EntityMemory *LaneBX-0.5 Multiply(-0.5 LaneWidth))
-    Set(EntityMemory *LaneBX0.5 Multiply(0.5 LaneWidth))
-    Set(EntityMemory *LaneBX1.5 Multiply(1.5 LaneWidth))
-    Set(EntityMemory *LaneBX2.5 Multiply(2.5 LaneWidth))
-    Set(EntityMemory *LaneBX3.5 Multiply(3.5 LaneWidth))
-    Set(EntityMemory *LaneBXR Multiply(3.75 LaneWidth))
-    Set(EntityMemory *LaneTXL Multiply(0.05 LaneBXL))
-    Set(EntityMemory *LaneTX-3.5 Multiply(0.05 LaneBX-3.5))
-    Set(EntityMemory *LaneTX-2.5 Multiply(0.05 LaneBX-2.5))
-    Set(EntityMemory *LaneTX-1.5 Multiply(0.05 LaneBX-1.5))
-    Set(EntityMemory *LaneTX-0.5 Multiply(0.05 LaneBX-0.5))
-    Set(EntityMemory *LaneTX0.5 Multiply(0.05 LaneBX0.5))
-    Set(EntityMemory *LaneTX1.5 Multiply(0.05 LaneBX1.5))
-    Set(EntityMemory *LaneTX2.5 Multiply(0.05 LaneBX2.5))
-    Set(EntityMemory *LaneTX3.5 Multiply(0.05 LaneBX3.5))
-    Set(EntityMemory *LaneTXR Multiply(0.05 LaneBXR))
+    Set(EntityMemory *StageBorderBL Multiply(-3.75 LaneWidth))
+    Set(EntityMemory *StageBorderBR Multiply(3.75 LaneWidth))
+    Set(EntityMemory *StageBorderTL Multiply(0.05 StageBorderBL))
+    Set(EntityMemory *StageBorderTR Multiply(0.05 StageBorderBR))
+
+    Set(EntityMemory *Looper 0)
+    While(
+        Less(Looper 8)
+        SetShifted(EntityMemory *LaneBX Looper Multiply(LaneWidth Subtract(Looper 3.5)))
+        SetShifted(EntityMemory *LaneTX Looper Multiply(0.05 GetShifted(EntityMemory *LaneBX Looper)))
+        Set(EntityMemory *Looper Add(Looper 1))
+    )
 )
 
 #1.updateSequential:And(
@@ -360,84 +329,36 @@ DrawEffectLB:Draw(
     )
     Draw(
         TextureStageL
-        LaneBXL -0.63265
-        LaneTXL 0.91837
-        LaneTX-3.5 0.91837
-        LaneBX-3.5 -0.63265
-        LayerStage
-        1
-    )
-    Draw(
-        TextureLane
-        LaneBX-3.5 -0.63265
-        LaneTX-3.5 0.91837
-        LaneTX-2.5 0.91837
-        LaneBX-2.5 -0.63265
-        LayerStage
-        1
-    )
-    Draw(
-        TextureLane
-        LaneBX-2.5 -0.63265
-        LaneTX-2.5 0.91837
-        LaneTX-1.5 0.91837
-        LaneBX-1.5 -0.63265
-        LayerStage
-        1
-    )
-    Draw(
-        TextureLane
-        LaneBX-1.5 -0.63265
-        LaneTX-1.5 0.91837
-        LaneTX-0.5 0.91837
-        LaneBX-0.5 -0.63265
-        LayerStage
-        1
-    )
-    Draw(
-        TextureLane
-        LaneBX-0.5 -0.63265
-        LaneTX-0.5 0.91837
-        LaneTX0.5 0.91837
-        LaneBX0.5 -0.63265
-        LayerStage
-        1
-    )
-    Draw(
-        TextureLane
-        LaneBX0.5 -0.63265
-        LaneTX0.5 0.91837
-        LaneTX1.5 0.91837
-        LaneBX1.5 -0.63265
-        LayerStage
-        1
-    )
-    Draw(
-        TextureLane
-        LaneBX1.5 -0.63265
-        LaneTX1.5 0.91837
-        LaneTX2.5 0.91837
-        LaneBX2.5 -0.63265
-        LayerStage
-        1
-    )
-    Draw(
-        TextureLane
-        LaneBX2.5 -0.63265
-        LaneTX2.5 0.91837
-        LaneTX3.5 0.91837
-        LaneBX3.5 -0.63265
+        StageBorderBL -0.63265
+        StageBorderTL 0.91837
+        GetShifted(EntityMemory *LaneTX 0) 0.91837
+        GetShifted(EntityMemory *LaneBX 0) -0.63265
         LayerStage
         1
     )
     Draw(
         TextureStageR
-        LaneBX3.5 -0.63265
-        LaneTX3.5 0.91837
-        LaneTXR 0.91837
-        LaneBXR -0.63265
+        GetShifted(EntityMemory *LaneBX 7) -0.63265
+        GetShifted(EntityMemory *LaneTX 7) 0.91837
+        StageBorderTR 0.91837
+        StageBorderBR -0.63265
         LayerStage
         1
+    )
+
+    Set(EntityMemory *Looper 0)
+    While(
+        Less(Looper 7)
+        Draw(
+            TextureLane
+            GetShifted(EntityMemory *LaneBX Looper) -0.63265
+            GetShifted(EntityMemory *LaneTX Looper) 0.91837
+            GetShifted(EntityMemory *LaneTX Add(Looper 1)) 0.91837
+            GetShifted(EntityMemory *LaneBX Add(Looper 1)) -0.63265
+            LayerStage
+            1
+        )
+        Set(EntityMemory *Looper Add(Looper 1))
     )
 )
 
@@ -448,89 +369,22 @@ DrawEffectLB:Draw(
         Not(TempTouchOccupied)
         IsTouchY
         Execute(
-            And(
-                GreaterOr(TempTouchX LaneBX-3.5)
-                LessOr(TempTouchX LaneBX-2.5)
-                Execute(
-                    PlayEmptySound
-                    Spawn(
-                        9
-                        Time
-                        -3
+            Set(EntityMemory *Looper 0)
+            While(
+                Less(Looper 7)
+                And(
+                    GreaterOr(TempTouchX GetShifted(EntityMemory *LaneBX Looper))
+                    LessOr(TempTouchX GetShifted(EntityMemory *LaneBX Add(Looper 1)))
+                    Execute(
+                        PlayEmptySound
+                        Spawn(
+                            9
+                            Time
+                            Subtract(Looper 3)
+                        )
                     )
                 )
-            )
-            And(
-                GreaterOr(TempTouchX LaneBX-2.5)
-                LessOr(TempTouchX LaneBX-1.5)
-                Execute(
-                    PlayEmptySound
-                    Spawn(
-                        9
-                        Time
-                        -2
-                    )
-                )
-            )
-            And(
-                GreaterOr(TempTouchX LaneBX-1.5)
-                LessOr(TempTouchX LaneBX-0.5)
-                Execute(
-                    PlayEmptySound
-                    Spawn(
-                        9
-                        Time
-                        -1
-                    )
-                )
-            )
-            And(
-                GreaterOr(TempTouchX LaneBX-0.5)
-                LessOr(TempTouchX LaneBX0.5)
-                Execute(
-                    PlayEmptySound
-                    Spawn(
-                        9
-                        Time
-                        0
-                    )
-                )
-            )
-            And(
-                GreaterOr(TempTouchX LaneBX0.5)
-                LessOr(TempTouchX LaneBX1.5)
-                Execute(
-                    PlayEmptySound
-                    Spawn(
-                        9
-                        Time
-                        1
-                    )
-                )
-            )
-            And(
-                GreaterOr(TempTouchX LaneBX1.5)
-                LessOr(TempTouchX LaneBX2.5)
-                Execute(
-                    PlayEmptySound
-                    Spawn(
-                        9
-                        Time
-                        2
-                    )
-                )
-            )
-            And(
-                GreaterOr(TempTouchX LaneBX2.5)
-                LessOr(TempTouchX LaneBX3.5)
-                Execute(
-                    PlayEmptySound
-                    Spawn(
-                        9
-                        Time
-                        3
-                    )
-                )
+                Set(EntityMemory *Looper Add(Looper 1))
             )
         )
     )
@@ -842,7 +696,7 @@ DrawEffectLB:Draw(
     Set(EntityMemory *EffectLX2 Subtract(EffectX Multiply(0.75 HalfNoteWidth)))
     Set(EntityMemory *EffectLX3 Add(EffectX Multiply(0.75 HalfNoteWidth)))
     Set(EntityMemory *EffectLX4 Add(EffectX Multiply(0.5 HalfNoteWidth)))
-    Set(EntityMemory *EffectLY1 Add(-0.63265 Multiply(1.25 NoteWidth)))
+    Set(EntityMemory *EffectLY1 Add(-0.63265 Multiply(3 HalfNoteWidth)))
 )
 
 #7.updateParallel:Execute(
@@ -910,21 +764,8 @@ DrawEffectLB:Draw(
     Or(
         GreaterOr(EffectTimeDistance 0.6)
         Execute(
-            Set(EntityMemory *EffectAlpha Clamp(Divide(Subtract(0.4 EffectTimeDistance) 0.2 2) 0 0.5))
-            Set(
-                EntityMemory *EffectLY2
-                Add(
-                    -0.63265
-                    Multiply(
-                        LaneWidth
-                        If(
-                            Less(EffectTimeDistance 0.5)
-                            Multiply(4 Subtract(EffectTimeDistance Multiply(EffectTimeDistance EffectTimeDistance)))
-                            1
-                        )
-                    )
-                )
-            )
+            Set(EntityMemory *EffectAlpha Divide(Subtract(1 EaseInOutCubic(Divide(EffectTimeDistance 0.6))) 2))
+            Set(EntityMemory *EffectLY2 Add(-0.63265 Multiply(LaneWidth EaseOutCubic(Divide(EffectTimeDistance 0.6)))))
 
             Draw(
                 TextureEffectLF
@@ -1151,10 +992,10 @@ Index:Get(EntityInfo *Index)
 Archetype:Get(EntityInfo *Archetype)
 State:Get(EntityInfo *State)
 
-NoteHeadState:Get(EntityInfoArray Add(NoteHeadInfoOffset *State))
+NoteHeadState:GetShifted(EntityInfoArray NoteHeadInfoOffset *State)
 
-SimLineState1:Get(EntityInfoArray Add(SimLineInfoOffset1 *State))
-SimLineState2:Get(EntityInfoArray Add(SimLineInfoOffset2 *State))
+SimLineState1:GetShifted(EntityInfoArray SimLineInfoOffset1 *State)
+SimLineState2:GetShifted(EntityInfoArray SimLineInfoOffset2 *State)
 
 
 
@@ -1213,51 +1054,23 @@ TempTouchVW:Get(TemporaryData *TempTouchVW)
 
 *JudgeX1:0
 *JudgeX2:1
-*LaneBXL:2
-*LaneBX-3.5:3
-*LaneBX-2.5:4
-*LaneBX-1.5:5
-*LaneBX-0.5:6
-*LaneBX0.5:7
-*LaneBX1.5:8
-*LaneBX2.5:9
-*LaneBX3.5:10
-*LaneBXR:11
-*LaneTXL:12
-*LaneTX-3.5:13
-*LaneTX-2.5:14
-*LaneTX-1.5:15
-*LaneTX-0.5:16
-*LaneTX0.5:17
-*LaneTX1.5:18
-*LaneTX2.5:19
-*LaneTX3.5:20
-*LaneTXR:21
-*Tilt:22
+*Tilt:2
+*StageBorderBL:3
+*StageBorderBR:4
+*StageBorderTL:5
+*StageBorderTR:6
+*LaneBX:7
+*LaneTX:15
+*Looper:63
 
 JudgeX1:Get(EntityMemory *JudgeX1)
 JudgeX2:Get(EntityMemory *JudgeX2)
-LaneBXL:Get(EntityMemory *LaneBXL)
-LaneBX-3.5:Get(EntityMemory *LaneBX-3.5)
-LaneBX-2.5:Get(EntityMemory *LaneBX-2.5)
-LaneBX-1.5:Get(EntityMemory *LaneBX-1.5)
-LaneBX-0.5:Get(EntityMemory *LaneBX-0.5)
-LaneBX0.5:Get(EntityMemory *LaneBX0.5)
-LaneBX1.5:Get(EntityMemory *LaneBX1.5)
-LaneBX2.5:Get(EntityMemory *LaneBX2.5)
-LaneBX3.5:Get(EntityMemory *LaneBX3.5)
-LaneBXR:Get(EntityMemory *LaneBXR)
-LaneTXL:Get(EntityMemory *LaneTXL)
-LaneTX-3.5:Get(EntityMemory *LaneTX-3.5)
-LaneTX-2.5:Get(EntityMemory *LaneTX-2.5)
-LaneTX-1.5:Get(EntityMemory *LaneTX-1.5)
-LaneTX-0.5:Get(EntityMemory *LaneTX-0.5)
-LaneTX0.5:Get(EntityMemory *LaneTX0.5)
-LaneTX1.5:Get(EntityMemory *LaneTX1.5)
-LaneTX2.5:Get(EntityMemory *LaneTX2.5)
-LaneTX3.5:Get(EntityMemory *LaneTX3.5)
-LaneTXR:Get(EntityMemory *LaneTXR)
 Tilt:Get(EntityMemory *Tilt)
+StageBorderBL:Get(EntityMemory *StageBorderBL)
+StageBorderTL:Get(EntityMemory *StageBorderTL)
+StageBorderBR:Get(EntityMemory *StageBorderBR)
+StageBorderTR:Get(EntityMemory *StageBorderTR)
+Looper:Get(EntityMemory *Looper)
 
 
 
@@ -1311,8 +1124,8 @@ NoteTailY2:Get(EntityMemory *NoteTailY2)
 InputSuccess:Get(EntitySharedMemory *InputSuccess)
 InputTouchID:Get(EntitySharedMemory *InputTouchID)
 
-NoteHeadInputSuccess:Get(EntitySharedMemoryArray Add(NoteHeadSharedMemoryOffset *InputSuccess))
-NoteHeadInputTouchID:Get(EntitySharedMemoryArray Add(NoteHeadSharedMemoryOffset *InputTouchID))
+NoteHeadInputSuccess:GetShifted(EntitySharedMemoryArray NoteHeadSharedMemoryOffset *InputSuccess)
+NoteHeadInputTouchID:GetShifted(EntitySharedMemoryArray NoteHeadSharedMemoryOffset *InputTouchID)
 
 
 
@@ -1342,13 +1155,13 @@ NoteHeadInfoOffset:Multiply(NoteHeadIndex 3)
 NoteHeadDataOffset:Multiply(NoteHeadIndex 32)
 NoteHeadSharedMemoryOffset:Multiply(NoteHeadIndex 32)
 
-NoteHeadTime:Divide(Get(EntityDataArray Add(NoteHeadDataOffset *NoteTailTime)) Speed)
-NoteHeadLane:Multiply(Get(EntityDataArray Add(NoteHeadDataOffset *NoteTailLane)) If(Mirror -1 1))
+NoteHeadTime:Divide(GetShifted(EntityDataArray NoteHeadDataOffset *NoteTailTime) Speed)
+NoteHeadLane:Multiply(GetShifted(EntityDataArray NoteHeadDataOffset *NoteTailLane) If(Mirror -1 1))
 
-SimLineTime1:Divide(Get(EntityDataArray Add(SimLineDataOffset1 *NoteTailTime)) Speed)
-SimLineTime2:Divide(Get(EntityDataArray Add(SimLineDataOffset2 *NoteTailTime)) Speed)
-SimLineLane1:Multiply(Get(EntityDataArray Add(SimLineDataOffset1 *NoteTailLane)) If(Mirror -1 1))
-SimLineLane2:Multiply(Get(EntityDataArray Add(SimLineDataOffset2 *NoteTailLane)) If(Mirror -1 1))
+SimLineTime1:Divide(GetShifted(EntityDataArray SimLineDataOffset1 *NoteTailTime) Speed)
+SimLineTime2:Divide(GetShifted(EntityDataArray SimLineDataOffset2 *NoteTailTime) Speed)
+SimLineLane1:Multiply(GetShifted(EntityDataArray SimLineDataOffset1 *NoteTailLane) If(Mirror -1 1))
+SimLineLane2:Multiply(GetShifted(EntityDataArray SimLineDataOffset2 *NoteTailLane) If(Mirror -1 1))
 
 
 
