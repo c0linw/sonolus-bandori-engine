@@ -1,6 +1,6 @@
 //
 // Bandori Engine
-// For Sonolus 0.3.2.0
+// For Sonolus 0.3.4
 //
 // A recreation of BanG Dream! Girls Band Party engine
 // By Burrito
@@ -162,7 +162,7 @@ DrawNoteSlide:And(
 )
 
 PlayTapEffect:And(
-    HitEffect
+    NoteEffect
     Spawn(
         7
         Time
@@ -175,7 +175,7 @@ PlayTapEffect:And(
 )
 
 PlayFlickEffect:And(
-    HitEffect
+    NoteEffect
     Spawn(
         8
         Time
@@ -281,7 +281,7 @@ DrawEffectLB:Draw(
 // #0: Initialization
 
 #0.updateSequential:Execute(
-    Set(LevelMemory *StageAspectRatio If(AspectRatioFix 1.77778 AspectRatio))
+    Set(LevelMemory *StageAspectRatio If(StageAspectRatioLock 1.77778 AspectRatio))
     Set(LevelMemory *LaneWidth Divide(StageAspectRatio 4.375))
     Set(LevelMemory *NoteWidth Multiply(LaneWidth NoteSize))
     Set(LevelMemory *NoteHeight Multiply(NoteSize 0.08571))
@@ -386,7 +386,7 @@ DrawEffectLB:Draw(
                             Execute(
                                 PlayEmptySound
                                 And(
-                                    HitEffect
+                                    NoteEffect
                                     Spawn(
                                         9
                                         Time
@@ -1011,10 +1011,10 @@ InputOffset:Get(LevelData *InputOffset)
 *Mirror:5
 *SimLine:6
 *SoundEffect:7
-*HitEffect:8
+*NoteEffect:8
 *LaneEffect:9
 *StageTilt:10
-*AspectRatioFix:11
+*StageAspectRatioLock:11
 
 Offset:Get(LevelOption *Offset)
 Speed:Get(LevelOption *Speed)
@@ -1024,10 +1024,10 @@ ConnectorAlpha:Get(LevelOption *ConnectorAlpha)
 Mirror:Get(LevelOption *Mirror)
 SimLine:Get(LevelOption *SimLine)
 SoundEffect:Get(LevelOption *SoundEffect)
-HitEffect:Get(LevelOption *HitEffect)
+NoteEffect:Get(LevelOption *NoteEffect)
 LaneEffect:Get(LevelOption *LaneEffect)
 StageTilt:Get(LevelOption *StageTilt)
-AspectRatioFix:Get(LevelOption *AspectRatioFix)
+StageAspectRatioLock:Get(LevelOption *StageAspectRatioLock)
 
 
 

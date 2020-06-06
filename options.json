@@ -11,6 +11,7 @@
     },
     {
         "name": "#SPEED",
+        "standard": true,
         "type": "slider",
         "def": 1,
         "min": 0.5,
@@ -66,7 +67,7 @@
         "def": 1
     },
     {
-        "name": "#HIT_EFFECT",
+        "name": "#NOTE_EFFECT",
         "scope": "Bandori",
         "type": "toggle",
         "def": 1
@@ -84,7 +85,7 @@
         "def": 1
     },
     {
-        "name": "#ASPECTRATIO_FIX",
+        "name": "#STAGE_ASPECTRATIO_LOCK",
         "scope": "Bandori",
         "type": "toggle",
         "def": 1
