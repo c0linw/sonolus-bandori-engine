@@ -29,6 +29,21 @@ InitSimLine:And(
     Spawn(10 Index NoteSimLineIndex)
 )
 
+InitAutoNormal:And(
+    Auto
+    Execute(
+        PlayScheduled(EffectPerfect NoteTailTime MinEffectTime)
+        Set(EntityInput *Judgment JudgmentPerfect)
+    )
+)
+InitAutoFlick:And(
+    Auto
+    Execute(
+        PlayScheduled(EffectFlick NoteTailTime MinEffectTime)
+        Set(EntityInput *Judgment JudgmentPerfect)
+    )
+)
+
 IsNoteTailInGoodWindow:LessOr(Subtract(NoteTailTime Subtract(Time InputOffset)) GoodWindow)
 
 IsTouchY:LessOr(TempTouchY JudgeYMax)
@@ -121,7 +136,13 @@ DrawNoteSlide:And(
     Greater(NoteTailTime Time)
     Execute(
         If(
-            InputState
+            Or(
+                InputState
+                And(
+                    Auto
+                    GreaterOr(Time NoteHeadTime)
+                )
+            )
             Execute(
                 Set(EntityMemory *NoteHeadScale 1)
                 Set(EntityMemory *NoteHeadY -0.63265)
@@ -173,12 +194,36 @@ PlayTapEffect:And(
         NoteEffectLF
     )
 )
+PlayAutoTapEffect:And(
+    NoteEffect
+    Spawn(
+        7
+        NoteTailTime
+        NoteTailX
+        NoteEffectCB
+        NoteEffectCF
+        NoteEffectLB
+        NoteEffectLF
+    )
+)
 
 PlayFlickEffect:And(
     NoteEffect
     Spawn(
         8
         Time
+        NoteTailX
+        NoteEffectCB
+        NoteEffectCF
+        NoteEffectLB
+        NoteEffectLF
+    )
+)
+PlayAutoFlickEffect:And(
+    NoteEffect
+    Spawn(
+        8
+        NoteTailTime
         NoteTailX
         NoteEffectCB
         NoteEffectCF
@@ -368,47 +413,50 @@ DrawEffectLB:Draw(
     )
 )
 
-#1.touch@1:Execute(
-    Set(EntityMemory *Tilt Add(Tilt TempTouchX))
-    And(
-        TempTouchStarted
-        IsTouchY
-        Execute(
-            Set(EntityMemory *Looper 0)
-            While(
-                Less(Looper 7)
-                And(
-                    GreaterOr(TempTouchX GetShifted(EntityMemory *LaneBX Looper))
-                    LessOr(TempTouchX GetShifted(EntityMemory *LaneBX Add(Looper 1)))
-                    Execute(
-                        And(
-                            Not(TempTouchOccupied)
-                            Execute(
-                                PlayEmptySound
-                                And(
-                                    NoteEffect
-                                    Spawn(
-                                        9
-                                        Time
-                                        Subtract(Looper 3)
+#1.touch@1:Or(
+    Auto
+    Execute(
+        Set(EntityMemory *Tilt Add(Tilt TempTouchX))
+        And(
+            TempTouchStarted
+            IsTouchY
+            Execute(
+                Set(EntityMemory *Looper 0)
+                While(
+                    Less(Looper 7)
+                    And(
+                        GreaterOr(TempTouchX GetShifted(EntityMemory *LaneBX Looper))
+                        LessOr(TempTouchX GetShifted(EntityMemory *LaneBX Add(Looper 1)))
+                        Execute(
+                            And(
+                                Not(TempTouchOccupied)
+                                Execute(
+                                    PlayEmptySound
+                                    And(
+                                        NoteEffect
+                                        Spawn(
+                                            9
+                                            Time
+                                            Subtract(Looper 3)
+                                        )
                                     )
                                 )
                             )
-                        )
-                        And(
-                            LaneEffect
-                            Spawn(
-                                11
-                                Time
-                                GetShifted(EntityMemory *LaneBX Looper)
-                                GetShifted(EntityMemory *LaneTX Looper)
-                                GetShifted(EntityMemory *LaneTX Add(Looper 1))
-                                GetShifted(EntityMemory *LaneBX Add(Looper 1))
+                            And(
+                                LaneEffect
+                                Spawn(
+                                    11
+                                    Time
+                                    GetShifted(EntityMemory *LaneBX Looper)
+                                    GetShifted(EntityMemory *LaneTX Looper)
+                                    GetShifted(EntityMemory *LaneTX Add(Looper 1))
+                                    GetShifted(EntityMemory *LaneBX Add(Looper 1))
+                                )
                             )
                         )
                     )
+                    Set(EntityMemory *Looper Add(Looper 1))
                 )
-                Set(EntityMemory *Looper Add(Looper 1))
             )
         )
     )
@@ -423,29 +471,41 @@ DrawEffectLB:Draw(
 #2.initialize:Execute(
     InitNoteTail
     InitSimLine
+    InitAutoNormal
 )
 
-#2.touch:And(
-    Not(InputState)
-    IsNoteTailInGoodWindow
-    TempTouchStarted
-    Not(TempTouchOccupied)
-    IsTouchY
-    IsTouchXInTailLane
-    Execute(
-        Set(TemporaryMemory *TempTouchOccupied true)
-        Set(EntityMemory *InputState Terminated)
-        Set(EntitySharedMemory *InputSuccess true)
-        Set(EntitySharedMemory *InputTouchID TempTouchID)
-        Set(EntityInput *Judgment JudgeSimple(Subtract(TempTouchST InputOffset) NoteTailTime PerfectWindow GreatWindow GoodWindow))
-        PlayTapEffect
-        PlayJudgmentSound
+#2.touch:Or(
+    Auto
+    And(
+        Not(InputState)
+        IsNoteTailInGoodWindow
+        TempTouchStarted
+        Not(TempTouchOccupied)
+        IsTouchY
+        IsTouchXInTailLane
+        Execute(
+            Set(TemporaryMemory *TempTouchOccupied true)
+            Set(EntityMemory *InputState Terminated)
+            Set(EntitySharedMemory *InputSuccess true)
+            Set(EntitySharedMemory *InputTouchID TempTouchID)
+            Set(EntityInput *Judgment JudgeSimple(Subtract(TempTouchST InputOffset) NoteTailTime PerfectWindow GreatWindow GoodWindow))
+            PlayTapEffect
+            PlayJudgmentSound
+        )
     )
 )
 
 #2.updateParallel:Execute(
     UpdateNoteTailTimeDistance
     Or(
+        And(
+            Auto
+            GreaterOr(Time NoteTailTime)
+            Execute(
+                PlayAutoTapEffect
+                true
+            )
+        )
         Equal(InputState Terminated)
         Greater(Subtract(NoteTailTimeDistance InputOffset) GoodWindow)
         Execute(
@@ -464,43 +524,47 @@ DrawEffectLB:Draw(
 #3.initialize:Execute(
     InitNoteTail
     InitSimLine
+    InitAutoFlick
 )
 
-#3.touch:Execute(
-    And(
-        Not(InputState)
-        IsNoteTailInGoodWindow
-        TempTouchStarted
-        Not(TempTouchOccupied)
-        IsTouchY
-        IsTouchXInTailLane
-        Execute(
-            Set(TemporaryMemory *TempTouchOccupied true)
-            Set(EntityMemory *InputState Activated)
-            Set(EntityMemory *ActivationTime TempTouchST)
-            Set(EntitySharedMemory *InputTouchID TempTouchID)
+#3.touch:Or(
+    Auto
+    Execute(
+        And(
+            Not(InputState)
+            IsNoteTailInGoodWindow
+            TempTouchStarted
+            Not(TempTouchOccupied)
+            IsTouchY
+            IsTouchXInTailLane
+            Execute(
+                Set(TemporaryMemory *TempTouchOccupied true)
+                Set(EntityMemory *InputState Activated)
+                Set(EntityMemory *ActivationTime TempTouchST)
+                Set(EntitySharedMemory *InputTouchID TempTouchID)
+            )
         )
-    )
-    And(
-        InputState
-        NotEqual(InputState Terminated)
-        Equal(TempTouchID InputTouchID)
-        Execute(
-            Set(TemporaryMemory *TempTouchOccupied true)
-            Or(
-                And(
-                    IsNoteTailInGoodWindow
-                    GreaterOr(TempTouchVR MinVR)
-                    Execute(
-                        Set(EntityMemory *InputState Terminated)
-                        Set(EntitySharedMemory *InputSuccess true)
-                        Set(EntityInput *Judgment JudgeSimple(Subtract(ActivationTime InputOffset) NoteTailTime PerfectWindow GreatWindow GoodWindow))
-                        PlayFlickEffect
-                        PlayFlickSound
-                        true
+        And(
+            InputState
+            NotEqual(InputState Terminated)
+            Equal(TempTouchID InputTouchID)
+            Execute(
+                Set(TemporaryMemory *TempTouchOccupied true)
+                Or(
+                    And(
+                        IsNoteTailInGoodWindow
+                        GreaterOr(TempTouchVR MinVR)
+                        Execute(
+                            Set(EntityMemory *InputState Terminated)
+                            Set(EntitySharedMemory *InputSuccess true)
+                            Set(EntityInput *Judgment JudgeSimple(Subtract(ActivationTime InputOffset) NoteTailTime PerfectWindow GreatWindow GoodWindow))
+                            PlayFlickEffect
+                            PlayFlickSound
+                            true
+                        )
                     )
+                    ProcessFlickDiscontinue
                 )
-                ProcessFlickDiscontinue
             )
         )
     )
@@ -509,6 +573,14 @@ DrawEffectLB:Draw(
 #3.updateParallel:Execute(
     UpdateNoteTailTimeDistance
     Or(
+        And(
+            Auto
+            GreaterOr(Time NoteTailTime)
+            Execute(
+                PlayAutoFlickEffect
+                true
+            )
+        )
         Equal(InputState Terminated)
         Greater(Subtract(NoteTailTimeDistance InputOffset) GoodWindow)
         Execute(
@@ -528,31 +600,35 @@ DrawEffectLB:Draw(
 #4.initialize:Execute(
     InitNoteHead
     InitNoteTail
+    InitAutoNormal
 )
 
-#4.touch:Execute(
-    ProcessTouchHead
-    And(
-        InputState
-        NotEqual(InputState Terminated)
-        Equal(TempTouchID InputTouchID)
-        Execute(
-            Set(TemporaryMemory *TempTouchOccupied true)
-            Or(
-                And(
-                    GreaterOr(Subtract(Time InputOffset) NoteTailTime)
-                    IsTouchY
-                    IsTouchXInTailLane
-                    Execute(
-                        Set(EntityMemory *InputState Terminated)
-                        Set(EntitySharedMemory *InputSuccess true)
-                        Set(EntityInput *Judgment JudgeSimple(Subtract(Time InputOffset) NoteTailTime PerfectWindow GreatWindow GoodWindow))
-                        PlayTapEffect
-                        PlayJudgmentSound
-                        true
+#4.touch:Or(
+    Auto
+    Execute(
+        ProcessTouchHead
+        And(
+            InputState
+            NotEqual(InputState Terminated)
+            Equal(TempTouchID InputTouchID)
+            Execute(
+                Set(TemporaryMemory *TempTouchOccupied true)
+                Or(
+                    And(
+                        GreaterOr(Subtract(Time InputOffset) NoteTailTime)
+                        IsTouchY
+                        IsTouchXInTailLane
+                        Execute(
+                            Set(EntityMemory *InputState Terminated)
+                            Set(EntitySharedMemory *InputSuccess true)
+                            Set(EntityInput *Judgment JudgeSimple(Subtract(Time InputOffset) NoteTailTime PerfectWindow GreatWindow GoodWindow))
+                            PlayTapEffect
+                            PlayJudgmentSound
+                            true
+                        )
                     )
+                    ProcessTouchDiscontinue
                 )
-                ProcessTouchDiscontinue
             )
         )
     )
@@ -563,6 +639,15 @@ DrawEffectLB:Draw(
     UpdateNoteTailTimeDistance
     Or(
         And(
+            Auto
+            GreaterOr(Time NoteTailTime)
+            Execute(
+                PlayAutoTapEffect
+                true
+            )
+        )
+        And(
+            Not(Auto)
             Not(InputState)
             Greater(Subtract(NoteHeadTimeDistance InputOffset) GoodWindow)
         )
@@ -588,32 +673,36 @@ DrawEffectLB:Draw(
     InitNoteHead
     InitNoteTail
     InitSimLine
+    InitAutoNormal
 )
 
-#5.touch:Execute(
-    ProcessTouchHead
-    And(
-        InputState
-        NotEqual(InputState Terminated)
-        Equal(TempTouchID InputTouchID)
-        Execute(
-            Set(TemporaryMemory *TempTouchOccupied true)
-            Or(
-                And(
-                    IsNoteTailInGoodWindow
-                    TempTouchEnded
-                    IsTouchY
-                    IsTouchXInTailLane
-                    Execute(
-                        Set(EntityMemory *InputState Terminated)
-                        Set(EntitySharedMemory *InputSuccess true)
-                        Set(EntityInput *Judgment JudgeSimple(Subtract(TempTouchT InputOffset) NoteTailTime PerfectWindow GreatWindow GoodWindow))
-                        PlayTapEffect
-                        PlayJudgmentSound
-                        true
+#5.touch:Or(
+    Auto
+    Execute(
+        ProcessTouchHead
+        And(
+            InputState
+            NotEqual(InputState Terminated)
+            Equal(TempTouchID InputTouchID)
+            Execute(
+                Set(TemporaryMemory *TempTouchOccupied true)
+                Or(
+                    And(
+                        IsNoteTailInGoodWindow
+                        TempTouchEnded
+                        IsTouchY
+                        IsTouchXInTailLane
+                        Execute(
+                            Set(EntityMemory *InputState Terminated)
+                            Set(EntitySharedMemory *InputSuccess true)
+                            Set(EntityInput *Judgment JudgeSimple(Subtract(TempTouchT InputOffset) NoteTailTime PerfectWindow GreatWindow GoodWindow))
+                            PlayTapEffect
+                            PlayJudgmentSound
+                            true
+                        )
                     )
+                    ProcessTouchDiscontinue
                 )
-                ProcessTouchDiscontinue
             )
         )
     )
@@ -624,6 +713,15 @@ DrawEffectLB:Draw(
     UpdateNoteTailTimeDistance
     Or(
         And(
+            Auto
+            GreaterOr(Time NoteTailTime)
+            Execute(
+                PlayAutoTapEffect
+                true
+            )
+        )
+        And(
+            Not(Auto)
             Not(InputState)
             Greater(Subtract(NoteHeadTimeDistance InputOffset) GoodWindow)
         )
@@ -649,40 +747,44 @@ DrawEffectLB:Draw(
     InitNoteHead
     InitNoteTail
     InitSimLine
+    InitAutoFlick
 )
 
-#6.touch:Execute(
-    ProcessTouchHead
-    And(
-        InputState
-        NotEqual(InputState Terminated)
-        Equal(TempTouchID InputTouchID)
-        Execute(
-            Set(TemporaryMemory *TempTouchOccupied true)
-            Or(
-                And(
-                    Equal(InputState Activated)
-                    GreaterOr(Subtract(Time InputOffset) NoteTailTime)
-                    IsTouchY
-                    IsTouchXInTailLane
-                    Execute(
-                        Set(EntityMemory *InputState ActivatedNext)
-                        true
+#6.touch:Or(
+    Auto
+    Execute(
+        ProcessTouchHead
+        And(
+            InputState
+            NotEqual(InputState Terminated)
+            Equal(TempTouchID InputTouchID)
+            Execute(
+                Set(TemporaryMemory *TempTouchOccupied true)
+                Or(
+                    And(
+                        Equal(InputState Activated)
+                        GreaterOr(Subtract(Time InputOffset) NoteTailTime)
+                        IsTouchY
+                        IsTouchXInTailLane
+                        Execute(
+                            Set(EntityMemory *InputState ActivatedNext)
+                            true
+                        )
                     )
-                )
-                And(
-                    Equal(InputState ActivatedNext)
-                    GreaterOr(TempTouchVR MinVR)
-                    Execute(
-                        Set(EntityMemory *InputState Terminated)
-                        Set(EntitySharedMemory *InputSuccess true)
-                        Set(EntityInput *Judgment JudgeSimple(Subtract(Time InputOffset) NoteTailTime PerfectWindow GreatWindow GoodWindow))
-                        PlayFlickEffect
-                        PlayFlickSound
-                        true
+                    And(
+                        Equal(InputState ActivatedNext)
+                        GreaterOr(TempTouchVR MinVR)
+                        Execute(
+                            Set(EntityMemory *InputState Terminated)
+                            Set(EntitySharedMemory *InputSuccess true)
+                            Set(EntityInput *Judgment JudgeSimple(Subtract(Time InputOffset) NoteTailTime PerfectWindow GreatWindow GoodWindow))
+                            PlayFlickEffect
+                            PlayFlickSound
+                            true
+                        )
                     )
+                    ProcessFlickDiscontinue
                 )
-                ProcessFlickDiscontinue
             )
         )
     )
@@ -693,6 +795,15 @@ DrawEffectLB:Draw(
     UpdateNoteTailTimeDistance
     Or(
         And(
+            Auto
+            GreaterOr(Time NoteTailTime)
+            Execute(
+                PlayAutoTapEffect
+                true
+            )
+        )
+        And(
+            Not(Auto)
             Not(InputState)
             Greater(Subtract(NoteHeadTimeDistance InputOffset) GoodWindow)
         )
@@ -825,6 +936,10 @@ DrawEffectLB:Draw(
 )
 
 #10.updateParallel:Or(
+    And(
+        Auto
+        GreaterOr(Time SimLineTime)
+    )
     Equal(SimLineState1 Despawned)
     Equal(SimLineState2 Despawned)
     And(
@@ -911,6 +1026,11 @@ LayerEffectCB:50
 LayerJudgeLine:2
 LayerLaneEffect:1
 LayerStage:0
+
+JudgmentMiss:0
+JudgmentPerfect:1
+JudgmentGreat:2
+JudgmentGood:3
 
 
 
@@ -1003,19 +1123,21 @@ InputOffset:Get(LevelData *InputOffset)
 
 // Level Option Layout
 
-*Offset:0
-*Speed:1
-*NoteSpeed:2
-*NoteSize:3
-*ConnectorAlpha:4
-*Mirror:5
-*SimLine:6
-*SoundEffect:7
-*NoteEffect:8
-*LaneEffect:9
-*StageTilt:10
-*StageAspectRatioLock:11
+*Auto:0
+*Offset:1
+*Speed:2
+*NoteSpeed:3
+*NoteSize:4
+*ConnectorAlpha:5
+*Mirror:6
+*SimLine:7
+*SoundEffect:8
+*NoteEffect:9
+*LaneEffect:10
+*StageTilt:11
+*StageAspectRatioLock:12
 
+Auto:Get(LevelOption *Auto)
 Offset:Get(LevelOption *Offset)
 Speed:Get(LevelOption *Speed)
 NoteSpeed:Get(LevelOption *NoteSpeed)
