@@ -32,14 +32,14 @@ InitSimLine:And(
 InitAutoNormal:And(
     Auto
     Execute(
-        PlayScheduled(EffectPerfect NoteTailTime MinEffectTime)
+        PlayScheduled(EffectPerfect Add(NoteTailTime AudioOffset Divide(Offset 1000)) MinEffectTime)
         Set(EntityInput *Judgment JudgmentPerfect)
     )
 )
 InitAutoFlick:And(
     Auto
     Execute(
-        PlayScheduled(EffectFlick NoteTailTime MinEffectTime)
+        PlayScheduled(EffectFlick Add(NoteTailTime AudioOffset Divide(Offset 1000)) MinEffectTime)
         Set(EntityInput *Judgment JudgmentPerfect)
     )
 )
