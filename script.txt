@@ -1,6 +1,6 @@
 //
 // Bandori Engine
-// For Sonolus 0.3.4
+// For Sonolus 0.3.5
 //
 // A recreation of BanG Dream! Girls Band Party engine
 // By Burrito
@@ -32,14 +32,14 @@ InitSimLine:And(
 InitAutoNormal:And(
     Auto
     Execute(
-        PlayScheduled(EffectPerfect Add(NoteTailTime AudioOffset Divide(Offset 1000)) MinEffectTime)
+        PlayScheduled(EffectPerfect NoteTailTime MinEffectTime)
         Set(EntityInput *Judgment JudgmentPerfect)
     )
 )
 InitAutoFlick:And(
     Auto
     Execute(
-        PlayScheduled(EffectFlick Add(NoteTailTime AudioOffset Divide(Offset 1000)) MinEffectTime)
+        PlayScheduled(EffectFlick NoteTailTime MinEffectTime)
         Set(EntityInput *Judgment JudgmentPerfect)
     )
 )
@@ -1313,7 +1313,7 @@ NoteHeadInputTouchID:GetShifted(EntitySharedMemoryArray NoteHeadSharedMemoryOffs
 *NoteEffectLF:8
 
 NoteHeadIndex:Get(EntityData *NoteHeadIndex)
-NoteTailTime:Divide(Get(EntityData *NoteTailTime) Speed)
+NoteTailTime:Divide(Add(Get(EntityData *NoteTailTime) Divide(Offset 1000)) Speed)
 NoteTailLane:Multiply(Get(EntityData *NoteTailLane) If(Mirror -1 1))
 NoteSimLineIndex:Get(EntityData *NoteSimLineIndex)
 NoteTexture:Get(EntityData *NoteTexture)
@@ -1326,11 +1326,11 @@ NoteHeadInfoOffset:Multiply(NoteHeadIndex 3)
 NoteHeadDataOffset:Multiply(NoteHeadIndex 32)
 NoteHeadSharedMemoryOffset:Multiply(NoteHeadIndex 32)
 
-NoteHeadTime:Divide(GetShifted(EntityDataArray NoteHeadDataOffset *NoteTailTime) Speed)
+NoteHeadTime:Divide(Add(GetShifted(EntityDataArray NoteHeadDataOffset *NoteTailTime) Divide(Offset 1000)) Speed)
 NoteHeadLane:Multiply(GetShifted(EntityDataArray NoteHeadDataOffset *NoteTailLane) If(Mirror -1 1))
 
-SimLineTime1:Divide(GetShifted(EntityDataArray SimLineDataOffset1 *NoteTailTime) Speed)
-SimLineTime2:Divide(GetShifted(EntityDataArray SimLineDataOffset2 *NoteTailTime) Speed)
+SimLineTime1:Divide(Add(GetShifted(EntityDataArray SimLineDataOffset1 *NoteTailTime) Divide(Offset 1000)) Speed)
+SimLineTime2:Divide(Add(GetShifted(EntityDataArray SimLineDataOffset2 *NoteTailTime) Divide(Offset 1000)) Speed)
 SimLineLane1:Multiply(GetShifted(EntityDataArray SimLineDataOffset1 *NoteTailLane) If(Mirror -1 1))
 SimLineLane2:Multiply(GetShifted(EntityDataArray SimLineDataOffset2 *NoteTailLane) If(Mirror -1 1))
 
