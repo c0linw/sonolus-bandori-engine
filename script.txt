@@ -34,6 +34,7 @@ InitAutoNormal:And(
     Execute(
         PlayScheduled(EffectPerfect NoteTailTime MinEffectTime)
         Set(EntityInput *Judgment JudgmentPerfect)
+        Set(EntityInput *Bucket NoteBucket)
     )
 )
 InitAutoFlick:And(
@@ -41,6 +42,7 @@ InitAutoFlick:And(
     Execute(
         PlayScheduled(EffectFlick NoteTailTime MinEffectTime)
         Set(EntityInput *Judgment JudgmentPerfect)
+        Set(EntityInput *Bucket NoteBucket)
     )
 )
 
@@ -489,6 +491,8 @@ DrawEffectLB:Draw(
             Set(EntitySharedMemory *InputSuccess true)
             Set(EntitySharedMemory *InputTouchID TempTouchID)
             Set(EntityInput *Judgment JudgeSimple(Subtract(TempTouchST InputOffset) NoteTailTime PerfectWindow GreatWindow GoodWindow))
+            Set(EntityInput *Bucket NoteBucket)
+            Set(EntityInput *BucketValue Multiply(1000 Subtract(TempTouchST InputOffset NoteTailTime)))
             PlayTapEffect
             PlayJudgmentSound
         )
@@ -558,6 +562,8 @@ DrawEffectLB:Draw(
                             Set(EntityMemory *InputState Terminated)
                             Set(EntitySharedMemory *InputSuccess true)
                             Set(EntityInput *Judgment JudgeSimple(Subtract(ActivationTime InputOffset) NoteTailTime PerfectWindow GreatWindow GoodWindow))
+                            Set(EntityInput *Bucket NoteBucket)
+                            Set(EntityInput *BucketValue Multiply(1000 Subtract(ActivationTime InputOffset NoteTailTime)))
                             PlayFlickEffect
                             PlayFlickSound
                             true
@@ -622,6 +628,8 @@ DrawEffectLB:Draw(
                             Set(EntityMemory *InputState Terminated)
                             Set(EntitySharedMemory *InputSuccess true)
                             Set(EntityInput *Judgment JudgeSimple(Subtract(Time InputOffset) NoteTailTime PerfectWindow GreatWindow GoodWindow))
+                            Set(EntityInput *Bucket NoteBucket)
+                            Set(EntityInput *BucketValue Multiply(1000 Subtract(Time InputOffset NoteTailTime)))
                             PlayTapEffect
                             PlayJudgmentSound
                             true
@@ -696,6 +704,8 @@ DrawEffectLB:Draw(
                             Set(EntityMemory *InputState Terminated)
                             Set(EntitySharedMemory *InputSuccess true)
                             Set(EntityInput *Judgment JudgeSimple(Subtract(TempTouchT InputOffset) NoteTailTime PerfectWindow GreatWindow GoodWindow))
+                            Set(EntityInput *Bucket NoteBucket)
+                            Set(EntityInput *BucketValue Multiply(1000 Subtract(TempTouchT InputOffset NoteTailTime)))
                             PlayTapEffect
                             PlayJudgmentSound
                             true
@@ -778,6 +788,8 @@ DrawEffectLB:Draw(
                             Set(EntityMemory *InputState Terminated)
                             Set(EntitySharedMemory *InputSuccess true)
                             Set(EntityInput *Judgment JudgeSimple(Subtract(Time InputOffset) NoteTailTime PerfectWindow GreatWindow GoodWindow))
+                            Set(EntityInput *Bucket NoteBucket)
+                            Set(EntityInput *BucketValue Multiply(1000 Subtract(Time InputOffset NoteTailTime)))
                             PlayFlickEffect
                             PlayFlickSound
                             true
@@ -1173,8 +1185,12 @@ SimLineState2:GetShifted(EntityInfoArray SimLineInfoOffset2 *State)
 // Entity Input Layout
 
 *Judgment:0
+*Bucket:1
+*BucketValue:2
 
 Judgment:Get(EntityInput *Judgment)
+Bucket:Get(EntityInput *Bucket)
+BucketValue:Get(EntityInput *BucketValue)
 
 
 
@@ -1306,16 +1322,18 @@ NoteHeadInputTouchID:GetShifted(EntitySharedMemoryArray NoteHeadSharedMemoryOffs
 *NoteTailTime:1
 *NoteTailLane:2
 *NoteSimLineIndex:3
-*NoteTexture:4
-*NoteEffectCB:5
-*NoteEffectCF:6
-*NoteEffectLB:7
-*NoteEffectLF:8
+*NoteBucket:4
+*NoteTexture:5
+*NoteEffectCB:6
+*NoteEffectCF:7
+*NoteEffectLB:8
+*NoteEffectLF:9
 
 NoteHeadIndex:Get(EntityData *NoteHeadIndex)
 NoteTailTime:Divide(Add(Get(EntityData *NoteTailTime) Divide(Offset 1000)) Speed)
 NoteTailLane:Multiply(Get(EntityData *NoteTailLane) If(Mirror -1 1))
 NoteSimLineIndex:Get(EntityData *NoteSimLineIndex)
+NoteBucket:Get(EntityData *NoteBucket)
 NoteTexture:Get(EntityData *NoteTexture)
 NoteEffectCB:Get(EntityData *NoteEffectCB)
 NoteEffectCF:Get(EntityData *NoteEffectCF)
