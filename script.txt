@@ -87,16 +87,12 @@ ProcessTouchDiscontinue:And(
     Or(
         TempTouchEnded
         Greater(TempTouchY JudgeYMax)
-        Greater(Subtract(Time InputOffset NoteTailTime) GoodWindow)
     )
     Set(EntityMemory *InputState Terminated)
 )
 
 ProcessFlickDiscontinue:And(
-    Or(
-        TempTouchEnded
-        Greater(Subtract(Time InputOffset NoteTailTime) GoodWindow)
-    )
+    TempTouchEnded
     Set(EntityMemory *InputState Terminated)
 )
 
@@ -554,7 +550,7 @@ DrawEffectLB:Draw(
             Equal(TempTouchID InputTouchID)
             Execute(
                 Set(TemporaryMemory *TempTouchOccupied true)
-                Or(
+                Execute(
                     And(
                         IsNoteTailInGoodWindow
                         GreaterOr(TempTouchVR MinVR)
@@ -566,7 +562,6 @@ DrawEffectLB:Draw(
                             Set(EntityInput *BucketValue Multiply(1000 Subtract(ActivationTime InputOffset NoteTailTime)))
                             PlayFlickEffect
                             PlayFlickSound
-                            true
                         )
                     )
                     ProcessFlickDiscontinue
@@ -619,7 +614,7 @@ DrawEffectLB:Draw(
             Equal(TempTouchID InputTouchID)
             Execute(
                 Set(TemporaryMemory *TempTouchOccupied true)
-                Or(
+                Execute(
                     And(
                         GreaterOr(Subtract(Time InputOffset) NoteTailTime)
                         IsTouchY
@@ -632,7 +627,6 @@ DrawEffectLB:Draw(
                             Set(EntityInput *BucketValue Multiply(1000 Subtract(Time InputOffset NoteTailTime)))
                             PlayTapEffect
                             PlayJudgmentSound
-                            true
                         )
                     )
                     ProcessTouchDiscontinue
@@ -654,12 +648,8 @@ DrawEffectLB:Draw(
                 true
             )
         )
-        And(
-            Not(Auto)
-            Not(InputState)
-            Greater(Subtract(NoteHeadTimeDistance InputOffset) GoodWindow)
-        )
         Equal(InputState Terminated)
+        Greater(Subtract(NoteTailTimeDistance InputOffset) GoodWindow)
         Execute(
             UpdateNoteTailScale
             DrawNoteSlide
@@ -694,7 +684,7 @@ DrawEffectLB:Draw(
             Equal(TempTouchID InputTouchID)
             Execute(
                 Set(TemporaryMemory *TempTouchOccupied true)
-                Or(
+                Execute(
                     And(
                         IsNoteTailInGoodWindow
                         TempTouchEnded
@@ -708,7 +698,6 @@ DrawEffectLB:Draw(
                             Set(EntityInput *BucketValue Multiply(1000 Subtract(TempTouchT InputOffset NoteTailTime)))
                             PlayTapEffect
                             PlayJudgmentSound
-                            true
                         )
                     )
                     ProcessTouchDiscontinue
@@ -730,12 +719,8 @@ DrawEffectLB:Draw(
                 true
             )
         )
-        And(
-            Not(Auto)
-            Not(InputState)
-            Greater(Subtract(NoteHeadTimeDistance InputOffset) GoodWindow)
-        )
         Equal(InputState Terminated)
+        Greater(Subtract(NoteTailTimeDistance InputOffset) GoodWindow)
         Execute(
             UpdateNoteTailScale
             DrawNoteSlide
@@ -770,16 +755,13 @@ DrawEffectLB:Draw(
             Equal(TempTouchID InputTouchID)
             Execute(
                 Set(TemporaryMemory *TempTouchOccupied true)
-                Or(
+                Execute(
                     And(
                         Equal(InputState Activated)
                         GreaterOr(Subtract(Time InputOffset) NoteTailTime)
                         IsTouchY
                         IsTouchXInTailLane
-                        Execute(
-                            Set(EntityMemory *InputState ActivatedNext)
-                            true
-                        )
+                        Set(EntityMemory *InputState ActivatedNext)
                     )
                     And(
                         Equal(InputState ActivatedNext)
@@ -792,7 +774,6 @@ DrawEffectLB:Draw(
                             Set(EntityInput *BucketValue Multiply(1000 Subtract(Time InputOffset NoteTailTime)))
                             PlayFlickEffect
                             PlayFlickSound
-                            true
                         )
                     )
                     ProcessFlickDiscontinue
@@ -814,12 +795,8 @@ DrawEffectLB:Draw(
                 true
             )
         )
-        And(
-            Not(Auto)
-            Not(InputState)
-            Greater(Subtract(NoteHeadTimeDistance InputOffset) GoodWindow)
-        )
         Equal(InputState Terminated)
+        Greater(Subtract(NoteTailTimeDistance InputOffset) GoodWindow)
         Execute(
             UpdateNoteTailScale
             DrawNoteSlide
