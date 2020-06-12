@@ -364,7 +364,7 @@ DrawEffectLB:Draw(
     SetShifted(LevelUI *UIMenu *UIBackground true)
 
     SetShifted(LevelUI *UIJudgment *UIAnchorX 0)
-    SetShifted(LevelUI *UIJudgment *UIAnchorY -0.5)
+    SetShifted(LevelUI *UIJudgment *UIAnchorY Multiply(StageHeight -0.25))
     SetShifted(LevelUI *UIJudgment *UIPivotX 0.5)
     SetShifted(LevelUI *UIJudgment *UIPivotY 0)
     SetShifted(LevelUI *UIJudgment *UIWidth 0.8)
