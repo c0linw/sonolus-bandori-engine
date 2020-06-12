@@ -510,7 +510,7 @@ DrawEffectLB:Draw(
                                 Execute(
                                     PlayEmptySound
                                     And(
-                                        NoteEffect
+                                        SlotEffect
                                         Spawn(
                                             9
                                             Time
@@ -1213,8 +1213,9 @@ InputOffset:Get(LevelData *InputOffset)
 *SoundEffect:8
 *NoteEffect:9
 *LaneEffect:10
-*StageTilt:11
-*StageAspectRatioLock:12
+*SlotEffect:11
+*StageTilt:12
+*StageAspectRatioLock:13
 
 Auto:Get(LevelOption *Auto)
 Offset:Get(LevelOption *Offset)
@@ -1227,6 +1228,7 @@ SimLine:Get(LevelOption *SimLine)
 SoundEffect:Get(LevelOption *SoundEffect)
 NoteEffect:Get(LevelOption *NoteEffect)
 LaneEffect:Get(LevelOption *LaneEffect)
+SlotEffect:Get(LevelOption *SlotEffect)
 StageTilt:Get(LevelOption *StageTilt)
 StageAspectRatioLock:Get(LevelOption *StageAspectRatioLock)
 

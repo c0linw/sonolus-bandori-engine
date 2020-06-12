@@ -85,6 +85,12 @@
         "def": 1
     },
     {
+        "name": "#SLOT_EFFECT",
+        "scope": "Bandori",
+        "type": "toggle",
+        "def": 1
+    },
+    {
         "name": "#STAGE_TILT",
         "scope": "Bandori",
         "type": "toggle",
