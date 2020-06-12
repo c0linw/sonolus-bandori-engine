@@ -365,6 +365,7 @@ DrawEffectLB:Draw(
     Set(LevelMemory *NoteBaseY1 Subtract(1 Divide(NoteHeight LaneYMultiplier)))
     Set(LevelMemory *NoteBaseY2 Add(1 Divide(NoteHeight LaneYMultiplier)))
     Set(LevelMemory *NoteScreenTime Divide(Subtract(12 NoteSpeed) 2))
+    Set(LevelMemory *NoteTimeOffset Divide(Offset 1000))
 
     Set(EntityMemory *Looper 0)
     While(
@@ -1176,9 +1177,10 @@ TemporaryData:101
 *NoteBaseY1:10
 *NoteBaseY2:11
 *NoteScreenTime:12
-*Tilt:13
-*LaneBX:14
-*LaneTX:22
+*NoteTimeOffset:13
+*Tilt:14
+*LaneBX:15
+*LaneTX:23
 
 StageWidth:Get(LevelMemory *StageWidth)
 StageHeight:Get(LevelMemory *StageHeight)
@@ -1193,6 +1195,7 @@ HalfNoteWidth:Get(LevelMemory *HalfNoteWidth)
 NoteBaseY1:Get(LevelMemory *NoteBaseY1)
 NoteBaseY2:Get(LevelMemory *NoteBaseY2)
 NoteScreenTime:Get(LevelMemory *NoteScreenTime)
+NoteTimeOffset:Get(LevelMemory *NoteTimeOffset)
 Tilt:Get(LevelMemory *Tilt)
 
 
@@ -1449,7 +1452,7 @@ NoteHeadInputTouchID:GetShifted(EntitySharedMemoryArray NoteHeadSharedMemoryOffs
 *NoteEffectLF:9
 
 NoteHeadIndex:Get(EntityData *NoteHeadIndex)
-NoteTailTime:Divide(Add(Get(EntityData *NoteTailTime) Divide(Offset 1000)) Speed)
+NoteTailTime:Divide(Add(Get(EntityData *NoteTailTime) NoteTimeOffset) Speed)
 NoteTailLane:Multiply(Get(EntityData *NoteTailLane) If(Mirror -1 1))
 NoteSimLineIndex:Get(EntityData *NoteSimLineIndex)
 NoteBucket:Get(EntityData *NoteBucket)
@@ -1463,11 +1466,11 @@ NoteHeadInfoOffset:Multiply(NoteHeadIndex 3)
 NoteHeadDataOffset:Multiply(NoteHeadIndex 32)
 NoteHeadSharedMemoryOffset:Multiply(NoteHeadIndex 32)
 
-NoteHeadTime:Divide(Add(GetShifted(EntityDataArray NoteHeadDataOffset *NoteTailTime) Divide(Offset 1000)) Speed)
+NoteHeadTime:Divide(Add(GetShifted(EntityDataArray NoteHeadDataOffset *NoteTailTime) NoteTimeOffset) Speed)
 NoteHeadLane:Multiply(GetShifted(EntityDataArray NoteHeadDataOffset *NoteTailLane) If(Mirror -1 1))
 
-SimLineTime1:Divide(Add(GetShifted(EntityDataArray SimLineDataOffset1 *NoteTailTime) Divide(Offset 1000)) Speed)
-SimLineTime2:Divide(Add(GetShifted(EntityDataArray SimLineDataOffset2 *NoteTailTime) Divide(Offset 1000)) Speed)
+SimLineTime1:Divide(Add(GetShifted(EntityDataArray SimLineDataOffset1 *NoteTailTime) NoteTimeOffset) Speed)
+SimLineTime2:Divide(Add(GetShifted(EntityDataArray SimLineDataOffset2 *NoteTailTime) NoteTimeOffset) Speed)
 SimLineLane1:Multiply(GetShifted(EntityDataArray SimLineDataOffset1 *NoteTailLane) If(Mirror -1 1))
 SimLineLane2:Multiply(GetShifted(EntityDataArray SimLineDataOffset2 *NoteTailLane) If(Mirror -1 1))
 
