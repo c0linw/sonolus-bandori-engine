@@ -230,6 +230,18 @@ PlayAutoFlickEffect:And(
     )
 )
 
+PlayAutoLaneEffect:And(
+    LaneEffect
+    Spawn(
+        11
+        Time
+        GetShifted(LevelMemory *LaneBX Add(NoteTailLane 3))
+        GetShifted(LevelMemory *LaneTX Add(NoteTailLane 3))
+        GetShifted(LevelMemory *LaneTX Add(NoteTailLane 4))
+        GetShifted(LevelMemory *LaneBX Add(NoteTailLane 4))
+    )
+)
+
 PlayJudgmentSound:And(
     SoundEffect
     Play(Judgment MinEffectTime)
@@ -354,6 +366,14 @@ DrawEffectLB:Draw(
     Set(LevelMemory *NoteBaseY2 Add(1 Divide(NoteHeight LaneYMultiplier)))
     Set(LevelMemory *NoteScreenTime Divide(Subtract(12 NoteSpeed) 2))
 
+    Set(EntityMemory *Looper 0)
+    While(
+        Less(Looper 8)
+        SetShifted(LevelMemory *LaneBX Looper Multiply(LaneWidth Subtract(Looper 3.5)))
+        SetShifted(LevelMemory *LaneTX Looper Multiply(0.05 GetShifted(LevelMemory *LaneBX Looper)))
+        Set(EntityMemory *Looper Add(Looper 1))
+    )
+
     SetShifted(LevelUI *UIMenu *UIAnchorX Subtract(AspectRatio 0.05))
     SetShifted(LevelUI *UIMenu *UIAnchorY 0.95)
     SetShifted(LevelUI *UIMenu *UIPivotX 1)
@@ -427,14 +447,6 @@ DrawEffectLB:Draw(
     Set(EntityMemory *StageBorderBR Multiply(3.75 LaneWidth))
     Set(EntityMemory *StageBorderTL Multiply(0.05 StageBorderBL))
     Set(EntityMemory *StageBorderTR Multiply(0.05 StageBorderBR))
-
-    Set(EntityMemory *Looper 0)
-    While(
-        Less(Looper 8)
-        SetShifted(EntityMemory *LaneBX Looper Multiply(LaneWidth Subtract(Looper 3.5)))
-        SetShifted(EntityMemory *LaneTX Looper Multiply(0.05 GetShifted(EntityMemory *LaneBX Looper)))
-        Set(EntityMemory *Looper Add(Looper 1))
-    )
 )
 
 #1.updateSequential:And(
@@ -459,15 +471,15 @@ DrawEffectLB:Draw(
         TextureStageL
         StageBorderBL LaneY1
         StageBorderTL LaneY2
-        GetShifted(EntityMemory *LaneTX 0) LaneY2
-        GetShifted(EntityMemory *LaneBX 0) LaneY1
+        GetShifted(LevelMemory *LaneTX 0) LaneY2
+        GetShifted(LevelMemory *LaneBX 0) LaneY1
         LayerStage
         1
     )
     Draw(
         TextureStageR
-        GetShifted(EntityMemory *LaneBX 7) LaneY1
-        GetShifted(EntityMemory *LaneTX 7) LaneY2
+        GetShifted(LevelMemory *LaneBX 7) LaneY1
+        GetShifted(LevelMemory *LaneTX 7) LaneY2
         StageBorderTR LaneY2
         StageBorderBR LaneY1
         LayerStage
@@ -479,10 +491,10 @@ DrawEffectLB:Draw(
         Less(Looper 7)
         Draw(
             TextureLane
-            GetShifted(EntityMemory *LaneBX Looper) LaneY1
-            GetShifted(EntityMemory *LaneTX Looper) LaneY2
-            GetShifted(EntityMemory *LaneTX Add(Looper 1)) LaneY2
-            GetShifted(EntityMemory *LaneBX Add(Looper 1)) LaneY1
+            GetShifted(LevelMemory *LaneBX Looper) LaneY1
+            GetShifted(LevelMemory *LaneTX Looper) LaneY2
+            GetShifted(LevelMemory *LaneTX Add(Looper 1)) LaneY2
+            GetShifted(LevelMemory *LaneBX Add(Looper 1)) LaneY1
             LayerStage
             1
         )
@@ -500,8 +512,8 @@ DrawEffectLB:Draw(
             While(
                 Less(Looper 7)
                 And(
-                    GreaterOr(TempTouchX GetShifted(EntityMemory *LaneBX Looper))
-                    LessOr(TempTouchX GetShifted(EntityMemory *LaneBX Add(Looper 1)))
+                    GreaterOr(TempTouchX GetShifted(LevelMemory *LaneBX Looper))
+                    LessOr(TempTouchX GetShifted(LevelMemory *LaneBX Add(Looper 1)))
                     Execute(
                         And(
                             Not(TempTouchOccupied)
@@ -522,10 +534,10 @@ DrawEffectLB:Draw(
                             Spawn(
                                 11
                                 Time
-                                GetShifted(EntityMemory *LaneBX Looper)
-                                GetShifted(EntityMemory *LaneTX Looper)
-                                GetShifted(EntityMemory *LaneTX Add(Looper 1))
-                                GetShifted(EntityMemory *LaneBX Add(Looper 1))
+                                GetShifted(LevelMemory *LaneBX Looper)
+                                GetShifted(LevelMemory *LaneTX Looper)
+                                GetShifted(LevelMemory *LaneTX Add(Looper 1))
+                                GetShifted(LevelMemory *LaneBX Add(Looper 1))
                             )
                         )
                     )
@@ -579,6 +591,7 @@ DrawEffectLB:Draw(
             GreaterOr(Time NoteTailTime)
             Execute(
                 PlayAutoTapEffect
+                PlayAutoLaneEffect
                 true
             )
         )
@@ -653,6 +666,7 @@ DrawEffectLB:Draw(
             GreaterOr(Time NoteTailTime)
             Execute(
                 PlayAutoFlickEffect
+                PlayAutoLaneEffect
                 true
             )
         )
@@ -718,6 +732,7 @@ DrawEffectLB:Draw(
             GreaterOr(Time NoteTailTime)
             Execute(
                 PlayAutoTapEffect
+                PlayAutoLaneEffect
                 true
             )
         )
@@ -788,6 +803,7 @@ DrawEffectLB:Draw(
             GreaterOr(Time NoteTailTime)
             Execute(
                 PlayAutoTapEffect
+                PlayAutoLaneEffect
                 true
             )
         )
@@ -863,6 +879,7 @@ DrawEffectLB:Draw(
             GreaterOr(Time NoteTailTime)
             Execute(
                 PlayAutoTapEffect
+                PlayAutoLaneEffect
                 true
             )
         )
@@ -1160,6 +1177,8 @@ TemporaryData:101
 *NoteBaseY2:11
 *NoteScreenTime:12
 *Tilt:13
+*LaneBX:14
+*LaneTX:22
 
 StageWidth:Get(LevelMemory *StageWidth)
 StageHeight:Get(LevelMemory *StageHeight)
@@ -1331,6 +1350,14 @@ TempTouchVW:Get(TemporaryData *TempTouchVW)
 
 
 
+// Common Entity Memory Layout
+
+*Looper:63
+
+Looper:Get(EntityMemory *Looper)
+
+
+
 // #1 Memory Layout
 
 *JudgeX1:0
@@ -1341,9 +1368,6 @@ TempTouchVW:Get(TemporaryData *TempTouchVW)
 *StageBorderBR:5
 *StageBorderTL:6
 *StageBorderTR:7
-*LaneBX:8
-*LaneTX:16
-*Looper:63
 
 JudgeX1:Get(EntityMemory *JudgeX1)
 JudgeX2:Get(EntityMemory *JudgeX2)
@@ -1353,7 +1377,6 @@ StageBorderBL:Get(EntityMemory *StageBorderBL)
 StageBorderTL:Get(EntityMemory *StageBorderTL)
 StageBorderBR:Get(EntityMemory *StageBorderBR)
 StageBorderTR:Get(EntityMemory *StageBorderTR)
-Looper:Get(EntityMemory *Looper)
 
 
 
