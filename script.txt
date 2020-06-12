@@ -441,7 +441,7 @@ DrawEffectLB:Draw(
     StageTilt
     Execute(
         Set(LevelTransform 4 Multiply(0.5 Add(Get(LevelTransform 4) Divide(Tilt AspectRatio -10))))
-        Set(EntityMemory *Tilt 0)
+        Set(LevelMemory *Tilt 0)
     )
 )
 
@@ -492,48 +492,45 @@ DrawEffectLB:Draw(
 
 #1.touch@1:Or(
     Auto
-    Execute(
-        Set(EntityMemory *Tilt Add(Tilt TempTouchX))
-        And(
-            TempTouchStarted
-            IsTouchY
-            Execute(
-                Set(EntityMemory *Looper 0)
-                While(
-                    Less(Looper 7)
-                    And(
-                        GreaterOr(TempTouchX GetShifted(EntityMemory *LaneBX Looper))
-                        LessOr(TempTouchX GetShifted(EntityMemory *LaneBX Add(Looper 1)))
-                        Execute(
-                            And(
-                                Not(TempTouchOccupied)
-                                Execute(
-                                    PlayEmptySound
-                                    And(
-                                        SlotEffect
-                                        Spawn(
-                                            9
-                                            Time
-                                            Subtract(Looper 3)
-                                        )
+    And(
+        TempTouchStarted
+        IsTouchY
+        Execute(
+            Set(EntityMemory *Looper 0)
+            While(
+                Less(Looper 7)
+                And(
+                    GreaterOr(TempTouchX GetShifted(EntityMemory *LaneBX Looper))
+                    LessOr(TempTouchX GetShifted(EntityMemory *LaneBX Add(Looper 1)))
+                    Execute(
+                        And(
+                            Not(TempTouchOccupied)
+                            Execute(
+                                PlayEmptySound
+                                And(
+                                    SlotEffect
+                                    Spawn(
+                                        9
+                                        Time
+                                        Subtract(Looper 3)
                                     )
                                 )
                             )
-                            And(
-                                LaneEffect
-                                Spawn(
-                                    11
-                                    Time
-                                    GetShifted(EntityMemory *LaneBX Looper)
-                                    GetShifted(EntityMemory *LaneTX Looper)
-                                    GetShifted(EntityMemory *LaneTX Add(Looper 1))
-                                    GetShifted(EntityMemory *LaneBX Add(Looper 1))
-                                )
+                        )
+                        And(
+                            LaneEffect
+                            Spawn(
+                                11
+                                Time
+                                GetShifted(EntityMemory *LaneBX Looper)
+                                GetShifted(EntityMemory *LaneTX Looper)
+                                GetShifted(EntityMemory *LaneTX Add(Looper 1))
+                                GetShifted(EntityMemory *LaneBX Add(Looper 1))
                             )
                         )
                     )
-                    Set(EntityMemory *Looper Add(Looper 1))
                 )
+                Set(EntityMemory *Looper Add(Looper 1))
             )
         )
     )
@@ -693,6 +690,7 @@ DrawEffectLB:Draw(
             Equal(TempTouchID InputTouchID)
             Execute(
                 Set(TemporaryMemory *TempTouchOccupied true)
+                Set(LevelMemory *Tilt Add(Tilt TempTouchX))
                 Execute(
                     And(
                         GreaterOr(Subtract(Time InputOffset) NoteTailTime)
@@ -763,6 +761,7 @@ DrawEffectLB:Draw(
             Equal(TempTouchID InputTouchID)
             Execute(
                 Set(TemporaryMemory *TempTouchOccupied true)
+                Set(LevelMemory *Tilt Add(Tilt TempTouchX))
                 Execute(
                     And(
                         IsNoteTailInGoodWindow
@@ -834,6 +833,7 @@ DrawEffectLB:Draw(
             Equal(TempTouchID InputTouchID)
             Execute(
                 Set(TemporaryMemory *TempTouchOccupied true)
+                Set(LevelMemory *Tilt Add(Tilt TempTouchX))
                 Execute(
                     And(
                         Equal(InputState Activated)
@@ -1167,6 +1167,7 @@ TemporaryData:101
 *NoteBaseY1:10
 *NoteBaseY2:11
 *NoteScreenTime:12
+*Tilt:13
 
 StageWidth:Get(LevelMemory *StageWidth)
 StageHeight:Get(LevelMemory *StageHeight)
@@ -1181,6 +1182,7 @@ HalfNoteWidth:Get(LevelMemory *HalfNoteWidth)
 NoteBaseY1:Get(LevelMemory *NoteBaseY1)
 NoteBaseY2:Get(LevelMemory *NoteBaseY2)
 NoteScreenTime:Get(LevelMemory *NoteScreenTime)
+Tilt:Get(LevelMemory *Tilt)
 
 
 
@@ -1335,20 +1337,18 @@ TempTouchVW:Get(TemporaryData *TempTouchVW)
 *JudgeX2:1
 *JudgeY1:2
 *JudgeY2:3
-*Tilt:4
-*StageBorderBL:5
-*StageBorderBR:6
-*StageBorderTL:7
-*StageBorderTR:8
-*LaneBX:9
-*LaneTX:17
+*StageBorderBL:4
+*StageBorderBR:5
+*StageBorderTL:6
+*StageBorderTR:7
+*LaneBX:8
+*LaneTX:16
 *Looper:63
 
 JudgeX1:Get(EntityMemory *JudgeX1)
 JudgeX2:Get(EntityMemory *JudgeX2)
 JudgeY1:Get(EntityMemory *JudgeY1)
 JudgeY2:Get(EntityMemory *JudgeY2)
-Tilt:Get(EntityMemory *Tilt)
 StageBorderBL:Get(EntityMemory *StageBorderBL)
 StageBorderTL:Get(EntityMemory *StageBorderTL)
 StageBorderBR:Get(EntityMemory *StageBorderBR)
