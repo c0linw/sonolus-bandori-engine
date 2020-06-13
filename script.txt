@@ -448,6 +448,7 @@ DrawEffectLB:Draw(
     Set(EntityMemory *StageBorderBR Multiply(3.75 LaneWidth))
     Set(EntityMemory *StageBorderTL Multiply(0.05 StageBorderBL))
     Set(EntityMemory *StageBorderTR Multiply(0.05 StageBorderBR))
+    Set(EntityMemory *StageCoverY Lerp(LaneY2 LaneY1 StageCover))
 )
 
 #1.updateSequential:And(
@@ -459,6 +460,19 @@ DrawEffectLB:Draw(
 )
 
 #1.updateParallel:Execute(
+    And(
+        StageCover
+        Draw(
+            TextureStageCover
+            JudgeX1 StageCoverY
+            JudgeX1 1
+            JudgeX2 1
+            JudgeX2 StageCoverY
+            LayerStageCover
+            1
+        )
+    )
+
     Draw(
         TextureJudgeLine
         JudgeX1 JudgeY1
@@ -1092,6 +1106,7 @@ MinVR:1.5
 
 MinEffectTime:0.02
 
+LayerStageCover:1000
 LayerNoteMarker:101
 LayerNoteBody:100
 LayerNoteSlide:99
@@ -1124,6 +1139,7 @@ TextureEffectLB:33000
 TextureEffectLF:34000
 TextureStageL:40001
 TextureStageR:40002
+TextureStageCover:42000
 
 
 
@@ -1224,18 +1240,19 @@ InputOffset:Get(LevelData *InputOffset)
 *NoteSpeed:3
 *NoteSize:4
 *ConnectorAlpha:5
-*Mirror:6
-*SimLine:7
-*SoundEffect:8
-*NoteEffect:9
-*LaneEffect:10
-*SlotEffect:11
-*StageTilt:12
-*StageAspectRatioLock:13
-*UIJudgmentSize:14
-*UIJudgmentAlpha:15
-*UIComboSize:16
-*UIComboAlpha:17
+*StageCover:6
+*Mirror:7
+*SimLine:8
+*SoundEffect:9
+*NoteEffect:10
+*LaneEffect:11
+*SlotEffect:12
+*StageTilt:13
+*StageAspectRatioLock:14
+*UIJudgmentSize:15
+*UIJudgmentAlpha:16
+*UIComboSize:17
+*UIComboAlpha:18
 
 Auto:Get(LevelOption *Auto)
 Offset:Get(LevelOption *Offset)
@@ -1243,6 +1260,7 @@ Speed:Get(LevelOption *Speed)
 NoteSpeed:Get(LevelOption *NoteSpeed)
 NoteSize:Get(LevelOption *NoteSize)
 ConnectorAlpha:Get(LevelOption *ConnectorAlpha)
+StageCover:Get(LevelOption *StageCover)
 Mirror:Get(LevelOption *Mirror)
 SimLine:Get(LevelOption *SimLine)
 SoundEffect:Get(LevelOption *SoundEffect)
@@ -1371,6 +1389,7 @@ Looper:Get(EntityMemory *Looper)
 *StageBorderBR:5
 *StageBorderTL:6
 *StageBorderTR:7
+*StageCoverY:8
 
 JudgeX1:Get(EntityMemory *JudgeX1)
 JudgeX2:Get(EntityMemory *JudgeX2)
@@ -1380,6 +1399,7 @@ StageBorderBL:Get(EntityMemory *StageBorderBL)
 StageBorderTL:Get(EntityMemory *StageBorderTL)
 StageBorderBR:Get(EntityMemory *StageBorderBR)
 StageBorderTR:Get(EntityMemory *StageBorderTR)
+StageCoverY:Get(EntityMemory *StageCoverY)
 
 
 

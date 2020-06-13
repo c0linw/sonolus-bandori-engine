@@ -56,6 +56,16 @@
         "display": "percentage"
     },
     {
+        "name": "#STAGE_COVER_VERTICAL",
+        "scope": "Bandori",
+        "type": "slider",
+        "def": 0,
+        "min": 0,
+        "max": 1,
+        "step": 0.05,
+        "display": "percentage"
+    },
+    {
         "name": "#MIRROR",
         "type": "toggle",
         "def": 0
