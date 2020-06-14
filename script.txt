@@ -84,14 +84,6 @@ ProcessTouchHead:And(
 )
 
 ProcessTouchDiscontinue:And(
-    Or(
-        TempTouchEnded
-        Greater(TempTouchY JudgeYMax)
-    )
-    Set(EntityMemory *InputState Terminated)
-)
-
-ProcessFlickDiscontinue:And(
     TempTouchEnded
     Set(EntityMemory *InputState Terminated)
 )
@@ -668,7 +660,7 @@ DrawEffectLB:Draw(
                         PlayFlickSound
                     )
                 )
-                ProcessFlickDiscontinue
+                ProcessTouchDiscontinue
             )
         )
     )
@@ -880,7 +872,7 @@ DrawEffectLB:Draw(
                         PlayFlickSound
                     )
                 )
-                ProcessFlickDiscontinue
+                ProcessTouchDiscontinue
             )
         )
     )
