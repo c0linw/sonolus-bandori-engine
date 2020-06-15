@@ -744,6 +744,11 @@ DrawEffectLB:Draw(
                 true
             )
         )
+        And(
+            Not(Auto)
+            Not(InputState)
+            Greater(Subtract(NoteHeadTimeDistance InputOffset) GoodWindow)
+        )
         Equal(InputState Terminated)
         Greater(Subtract(NoteTailTimeDistance InputOffset) GoodWindow)
         Execute(
@@ -816,6 +821,11 @@ DrawEffectLB:Draw(
             )
         )
         Equal(InputState Terminated)
+        And(
+            Not(Auto)
+            Not(InputState)
+            Greater(Subtract(NoteHeadTimeDistance InputOffset) GoodWindow)
+        )
         Greater(Subtract(NoteTailTimeDistance InputOffset) GoodWindow)
         Execute(
             UpdateNoteTailScale
@@ -892,6 +902,11 @@ DrawEffectLB:Draw(
             )
         )
         Equal(InputState Terminated)
+        And(
+            Not(Auto)
+            Not(InputState)
+            Greater(Subtract(NoteHeadTimeDistance InputOffset) GoodWindow)
+        )
         Greater(Subtract(NoteTailTimeDistance InputOffset) GoodWindow)
         Execute(
             UpdateNoteTailScale
