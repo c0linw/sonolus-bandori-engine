@@ -1,6 +1,6 @@
 //
 // Bandori Engine
-// For Sonolus 0.3.5
+// For Sonolus 0.3.6
 //
 // A recreation of BanG Dream! Girls Band Party engine
 // By Burrito
@@ -357,8 +357,9 @@ DrawEffectLB:Draw(
     Set(LevelMemory *NoteBaseY1 Subtract(1 Divide(NoteHeight LaneYMultiplier)))
     Set(LevelMemory *NoteBaseY2 Add(1 Divide(NoteHeight LaneYMultiplier)))
     Set(LevelMemory *NoteScreenTime Divide(Subtract(12 NoteSpeed) 2))
-    Set(LevelMemory *NoteTimeOffset Divide(Offset 1000))
+    Set(LevelMemory *NoteTimeOffset Divide(LevelAudioOffset 1000))
     Set(LevelMemory *MirrorMultiplier If(Mirror -1 1))
+    Set(LevelMemory *InputOffset Add(DeviceInputOffset Divide(LevelInputOffset 1000)))
 
     Set(EntityMemory *Looper 0)
     While(
@@ -384,7 +385,6 @@ DrawEffectLB:Draw(
     SetShifted(LevelUI *UIJudgment *UIWidth Multiply(0.8 UIJudgmentSize))
     SetShifted(LevelUI *UIJudgment *UIHeight Multiply(0.2 UIJudgmentSize))
     SetShifted(LevelUI *UIJudgment *UIAlpha UIJudgmentAlpha)
-    SetShifted(LevelUI *UIJudgment *UIVerticalAlign -1)
 
     SetShifted(LevelUI *UIComboValue *UIAnchorX Multiply(AspectRatio 0.7))
     SetShifted(LevelUI *UIComboValue *UIAnchorY 0)
@@ -393,35 +393,33 @@ DrawEffectLB:Draw(
     SetShifted(LevelUI *UIComboValue *UIWidth Multiply(0.5 UIComboSize))
     SetShifted(LevelUI *UIComboValue *UIHeight Multiply(0.25 UIComboSize))
     SetShifted(LevelUI *UIComboValue *UIAlpha UIComboAlpha)
-    SetShifted(LevelUI *UIComboValue *UIVerticalAlign -1)
 
     SetShifted(LevelUI *UIComboText *UIAnchorX Multiply(AspectRatio 0.7))
     SetShifted(LevelUI *UIComboText *UIAnchorY 0)
     SetShifted(LevelUI *UIComboText *UIPivotX 0.5)
     SetShifted(LevelUI *UIComboText *UIPivotY 1)
     SetShifted(LevelUI *UIComboText *UIWidth Multiply(0.5 UIComboSize))
-    SetShifted(LevelUI *UIComboText *UIHeight Multiply(0.25 UIComboSize))
+    SetShifted(LevelUI *UIComboText *UIHeight Multiply(0.15 UIComboSize))
     SetShifted(LevelUI *UIComboText *UIAlpha UIComboAlpha)
-    SetShifted(LevelUI *UIComboText *UIVerticalAlign 1)
 
     SetShifted(LevelUI *UIScoreBar *UIAnchorX Subtract(0.05 AspectRatio))
     SetShifted(LevelUI *UIScoreBar *UIAnchorY 0.95)
     SetShifted(LevelUI *UIScoreBar *UIPivotX 0)
     SetShifted(LevelUI *UIScoreBar *UIPivotY 1)
-    SetShifted(LevelUI *UIScoreBar *UIWidth 0.6)
+    SetShifted(LevelUI *UIScoreBar *UIWidth 0.75)
     SetShifted(LevelUI *UIScoreBar *UIHeight 0.15)
     SetShifted(LevelUI *UIScoreBar *UIAlpha 1)
     SetShifted(LevelUI *UIScoreBar *UIHorizontalAlign -1)
     SetShifted(LevelUI *UIScoreBar *UIBackground true)
 
-    SetShifted(LevelUI *UIScoreValue *UIAnchorX Subtract(0.05 AspectRatio))
-    SetShifted(LevelUI *UIScoreValue *UIAnchorY 0.8)
+    SetShifted(LevelUI *UIScoreValue *UIAnchorX Subtract(0.2 AspectRatio))
+    SetShifted(LevelUI *UIScoreValue *UIAnchorY 0.95)
     SetShifted(LevelUI *UIScoreValue *UIPivotX 0)
     SetShifted(LevelUI *UIScoreValue *UIPivotY 1)
     SetShifted(LevelUI *UIScoreValue *UIWidth 0.6)
     SetShifted(LevelUI *UIScoreValue *UIHeight 0.15)
     SetShifted(LevelUI *UIScoreValue *UIAlpha 1)
-    SetShifted(LevelUI *UIScoreValue *UIHorizontalAlign -1)
+    SetShifted(LevelUI *UIScoreValue *UIHorizontalAlign 1)
 
     true
 )
@@ -1204,8 +1202,9 @@ TemporaryData:101
 *NoteTimeOffset:13
 *MirrorMultiplier:14
 *Tilt:15
-*LaneBX:16
-*LaneTX:24
+*InputOffset:16
+*LaneBX:17
+*LaneTX:25
 
 StageWidth:Get(LevelMemory *StageWidth)
 StageHeight:Get(LevelMemory *StageHeight)
@@ -1223,6 +1222,7 @@ NoteScreenTime:Get(LevelMemory *NoteScreenTime)
 NoteTimeOffset:Get(LevelMemory *NoteTimeOffset)
 MirrorMultiplier:Get(LevelMemory *MirrorMultiplier)
 Tilt:Get(LevelMemory *Tilt)
+InputOffset:Get(LevelMemory *InputOffset)
 
 
 
@@ -1231,41 +1231,43 @@ Tilt:Get(LevelMemory *Tilt)
 *Time:0
 *DeltaTime:1
 *AspectRatio:2
-*AudioOffset:3
-*InputOffset:4
+*DeviceAudioOffset:3
+*DeviceInputOffset:4
 
 Time:Get(LevelData *Time)
 DeltaTime:Get(LevelData *DeltaTime)
 AspectRatio:Get(LevelData *AspectRatio)
-AudioOffset:Get(LevelData *AudioOffset)
-InputOffset:Get(LevelData *InputOffset)
+DeviceAudioOffset:Get(LevelData *DeviceAudioOffset)
+DeviceInputOffset:Get(LevelData *DeviceInputOffset)
 
 
 
 // Level Option Layout
 
 *Auto:0
-*Offset:1
-*Speed:2
-*NoteSpeed:3
-*NoteSize:4
-*ConnectorAlpha:5
-*StageCover:6
-*Mirror:7
-*SimLine:8
-*SoundEffect:9
-*NoteEffect:10
-*LaneEffect:11
-*SlotEffect:12
-*StageTilt:13
-*StageAspectRatioLock:14
-*UIJudgmentSize:15
-*UIJudgmentAlpha:16
-*UIComboSize:17
-*UIComboAlpha:18
+*LevelAudioOffset:1
+*LevelInputOffset:2
+*Speed:3
+*NoteSpeed:4
+*NoteSize:5
+*ConnectorAlpha:6
+*StageCover:7
+*Mirror:8
+*SimLine:9
+*SoundEffect:10
+*NoteEffect:11
+*LaneEffect:12
+*SlotEffect:13
+*StageTilt:14
+*StageAspectRatioLock:15
+*UIJudgmentSize:16
+*UIJudgmentAlpha:17
+*UIComboSize:18
+*UIComboAlpha:19
 
 Auto:Get(LevelOption *Auto)
-Offset:Get(LevelOption *Offset)
+LevelAudioOffset:Get(LevelOption *LevelAudioOffset)
+LevelInputOffset:Get(LevelOption *LevelInputOffset)
 Speed:Get(LevelOption *Speed)
 NoteSpeed:Get(LevelOption *NoteSpeed)
 NoteSize:Get(LevelOption *NoteSize)
