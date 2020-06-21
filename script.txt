@@ -440,6 +440,16 @@ DrawEffectLB:Draw(
     Set(EntityMemory *StageBorderTL Multiply(0.05 StageBorderBL))
     Set(EntityMemory *StageBorderTR Multiply(0.05 StageBorderBR))
     Set(EntityMemory *StageCoverY Lerp(LaneY2 LaneY1 StageCover))
+
+    Set(EntityMemory *Looper 0)
+    While(
+        Less(Looper 7)
+        SetShifted(EntityMemory *SlotX1 Looper Multiply(LaneWidth Subtract(Looper 3 0.1)))
+        SetShifted(EntityMemory *SlotX2 Looper Multiply(LaneWidth Subtract(Looper 3 -0.1)))
+        SetShifted(EntityMemory *SlotY1 Looper Add(LaneYOffset LaneYMultiplier Multiply(LaneWidth -0.1)))
+        SetShifted(EntityMemory *SlotY2 Looper Add(LaneYOffset LaneYMultiplier Multiply(LaneWidth 0.1)))
+        Set(EntityMemory *Looper Add(Looper 1))
+    )
 )
 
 #1.updateSequential:And(
@@ -502,6 +512,15 @@ DrawEffectLB:Draw(
             GetShifted(LevelMemory *LaneTX Add(Looper 1)) LaneY2
             GetShifted(LevelMemory *LaneBX Add(Looper 1)) LaneY1
             LayerStage
+            1
+        )
+        Draw(
+            TextureSlot
+            GetShifted(EntityMemory *SlotX1 Looper) GetShifted(EntityMemory *SlotY1 Looper)
+            GetShifted(EntityMemory *SlotX1 Looper) GetShifted(EntityMemory *SlotY2 Looper)
+            GetShifted(EntityMemory *SlotX2 Looper) GetShifted(EntityMemory *SlotY2 Looper)
+            GetShifted(EntityMemory *SlotX2 Looper) GetShifted(EntityMemory *SlotY1 Looper)
+            LayerSlot
             1
         )
         Set(EntityMemory *Looper Add(Looper 1))
@@ -1122,6 +1141,7 @@ LayerEffectLF:53
 LayerEffectCF:52
 LayerEffectLB:51
 LayerEffectCB:50
+LayerSlot:3
 LayerJudgeLine:2
 LayerLaneEffect:1
 LayerStage:0
@@ -1136,6 +1156,7 @@ JudgmentGood:3
 // Texture identifiers
 
 TextureJudgeLine:41000
+TextureSlot:41001
 TextureLane:40100
 TextureSimLine:12006
 TextureSlide:1002
@@ -1402,6 +1423,10 @@ Looper:Get(EntityMemory *Looper)
 *StageBorderTL:6
 *StageBorderTR:7
 *StageCoverY:8
+*SlotX1:9
+*SlotX2:16
+*SlotY1:23
+*SlotY2:30
 
 JudgeX1:Get(EntityMemory *JudgeX1)
 JudgeX2:Get(EntityMemory *JudgeX2)
