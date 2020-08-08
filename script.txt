@@ -183,10 +183,10 @@ PlayTapEffect:And(
     Execute(
         SpawnParticleEffect(
             ParticleEffectTapNormalL
-            Subtract(NoteTailX HalfNoteWidth) LaneY1
-            Subtract(NoteTailX HalfNoteWidth) TapEffectLY2
-            Add(NoteTailX HalfNoteWidth) TapEffectLY2
-            Add(NoteTailX HalfNoteWidth) LaneY1
+            Subtract(NoteTailX HalfTapEffectLWidth) LaneY1
+            Subtract(NoteTailX HalfTapEffectLWidth) TapEffectLY2
+            Add(NoteTailX HalfTapEffectLWidth) TapEffectLY2
+            Add(NoteTailX HalfTapEffectLWidth) LaneY1
             0.4
             0
         )
@@ -206,10 +206,10 @@ PlayFlickEffect:And(
     Execute(
         SpawnParticleEffect(
             ParticleEffectTapFlickL
-            Subtract(NoteTailX HalfNoteWidth) LaneY1
-            Subtract(NoteTailX HalfNoteWidth) TapEffectLY2
-            Add(NoteTailX HalfNoteWidth) TapEffectLY2
-            Add(NoteTailX HalfNoteWidth) LaneY1
+            Subtract(NoteTailX HalfTapEffectLWidth) LaneY1
+            Subtract(NoteTailX HalfTapEffectLWidth) TapEffectLY2
+            Add(NoteTailX HalfTapEffectLWidth) TapEffectLY2
+            Add(NoteTailX HalfTapEffectLWidth) LaneY1
             0.4
             0
         )
@@ -283,10 +283,11 @@ PlayEmptySound:And(
     Set(LevelMemory *HalfNoteWidth Divide(NoteWidth 2))
     Set(LevelMemory *NoteBaseY1 Subtract(1 Divide(NoteHeight LaneYMultiplier)))
     Set(LevelMemory *NoteBaseY2 Add(1 Divide(NoteHeight LaneYMultiplier)))
-    Set(LevelMemory *TapEffectLY2 Add(LaneY1 Multiply(2 HalfNoteWidth)))
-    Set(LevelMemory *HalfTapEffectCWidth Multiply(HalfNoteWidth 3))
-    Set(LevelMemory *TapEffectCY1 Subtract(LaneY1 Multiply(HalfNoteWidth 2)))
-    Set(LevelMemory *TapEffectCY2 Add(LaneY1 Multiply(HalfNoteWidth 2)))
+    Set(LevelMemory *TapEffectLY2 Add(LaneY1 Multiply(2 HalfNoteWidth NoteEffectSize)))
+    Set(LevelMemory *HalfTapEffectLWidth Multiply(HalfNoteWidth NoteEffectSize))
+    Set(LevelMemory *HalfTapEffectCWidth Multiply(HalfNoteWidth NoteEffectSize 3))
+    Set(LevelMemory *TapEffectCY1 Subtract(LaneY1 Multiply(HalfNoteWidth NoteEffectSize 2)))
+    Set(LevelMemory *TapEffectCY2 Add(LaneY1 Multiply(HalfNoteWidth NoteEffectSize 2)))
     Set(LevelMemory *NoteScreenTime Divide(Subtract(12 NoteSpeed) 2))
     Set(LevelMemory *NoteTimeOffset Divide(LevelAudioOffset 1000))
     Set(LevelMemory *MirrorMultiplier If(Mirror -1 1))
@@ -479,10 +480,10 @@ PlayEmptySound:And(
                                     SlotEffect
                                     SpawnParticleEffect(
                                         ParticleEffectSlotL
-                                        Subtract(Multiply(Subtract(Looper 3) LaneWidth) HalfNoteWidth) LaneY1
-                                        Subtract(Multiply(Subtract(Looper 3) LaneWidth) HalfNoteWidth) TapEffectLY2
-                                        Add(Multiply(Subtract(Looper 3) LaneWidth) HalfNoteWidth) TapEffectLY2
-                                        Add(Multiply(Subtract(Looper 3) LaneWidth) HalfNoteWidth) LaneY1
+                                        Subtract(Multiply(Subtract(Looper 3) LaneWidth) HalfTapEffectLWidth) LaneY1
+                                        Subtract(Multiply(Subtract(Looper 3) LaneWidth) HalfTapEffectLWidth) TapEffectLY2
+                                        Add(Multiply(Subtract(Looper 3) LaneWidth) HalfTapEffectLWidth) TapEffectLY2
+                                        Add(Multiply(Subtract(Looper 3) LaneWidth) HalfTapEffectLWidth) LaneY1
                                         0.6
                                         0
                                     )
@@ -1037,16 +1038,17 @@ TemporaryData:101
 *NoteBaseY1:10
 *NoteBaseY2:11
 *TapEffectLY2:12
-*HalfTapEffectCWidth:13
-*TapEffectCY1:14
-*TapEffectCY2:15
-*NoteScreenTime:16
-*NoteTimeOffset:17
-*MirrorMultiplier:18
-*Tilt:19
-*InputOffset:20
-*LaneBX:21
-*LaneTX:29
+*HalfTapEffectLWidth:13
+*HalfTapEffectCWidth:14
+*TapEffectCY1:15
+*TapEffectCY2:16
+*NoteScreenTime:17
+*NoteTimeOffset:18
+*MirrorMultiplier:19
+*Tilt:20
+*InputOffset:21
+*LaneBX:22
+*LaneTX:30
 
 StageWidth:Get(LevelMemory *StageWidth)
 StageHeight:Get(LevelMemory *StageHeight)
@@ -1061,6 +1063,7 @@ HalfNoteWidth:Get(LevelMemory *HalfNoteWidth)
 NoteBaseY1:Get(LevelMemory *NoteBaseY1)
 NoteBaseY2:Get(LevelMemory *NoteBaseY2)
 TapEffectLY2:Get(LevelMemory *TapEffectLY2)
+HalfTapEffectLWidth:Get(LevelMemory *HalfTapEffectLWidth)
 HalfTapEffectCWidth:Get(LevelMemory *HalfTapEffectCWidth)
 TapEffectCY1:Get(LevelMemory *TapEffectCY1)
 TapEffectCY2:Get(LevelMemory *TapEffectCY2)
@@ -1096,20 +1099,21 @@ DeviceInputOffset:Get(LevelData *DeviceInputOffset)
 *Speed:3
 *NoteSpeed:4
 *NoteSize:5
-*ConnectorAlpha:6
-*StageCover:7
-*Mirror:8
-*SimLine:9
-*SoundEffect:10
-*NoteEffect:11
-*LaneEffect:12
-*SlotEffect:13
-*StageTilt:14
-*StageAspectRatioLock:15
-*UIJudgmentSize:16
-*UIJudgmentAlpha:17
-*UIComboSize:18
-*UIComboAlpha:19
+*NoteEffectSize:6
+*ConnectorAlpha:7
+*StageCover:8
+*Mirror:9
+*SimLine:10
+*SoundEffect:11
+*NoteEffect:12
+*LaneEffect:13
+*SlotEffect:14
+*StageTilt:15
+*StageAspectRatioLock:16
+*UIJudgmentSize:17
+*UIJudgmentAlpha:18
+*UIComboSize:19
+*UIComboAlpha:20
 
 Auto:Get(LevelOption *Auto)
 LevelAudioOffset:Get(LevelOption *LevelAudioOffset)
@@ -1117,6 +1121,7 @@ LevelInputOffset:Get(LevelOption *LevelInputOffset)
 Speed:Get(LevelOption *Speed)
 NoteSpeed:Get(LevelOption *NoteSpeed)
 NoteSize:Get(LevelOption *NoteSize)
+NoteEffectSize:Get(LevelOption *NoteEffectSize)
 ConnectorAlpha:Get(LevelOption *ConnectorAlpha)
 StageCover:Get(LevelOption *StageCover)
 Mirror:Get(LevelOption *Mirror)
