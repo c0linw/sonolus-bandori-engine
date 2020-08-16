@@ -55,10 +55,7 @@ InitAutoFlick:And(
 IsNoteTailInGoodWindow:LessOr(Subtract(NoteTailTime Subtract(Time InputOffset)) GoodWindow)
 
 IsTouchY:LessOr(TempTouchY JudgeYMax)
-IsTouchXInTailLane:And(
-    GreaterOr(TempTouchX Subtract(NoteTailX LaneWidth))
-    LessOr(TempTouchX Add(NoteTailX LaneWidth))
-)
+IsTouchXInTailLane:LessOr(Abs(Subtract(TempTouchX NoteTailX)) Multiply(LaneWidth 1.175))
 
 ProcessTouchHead:And(
     Not(InputState)
