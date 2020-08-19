@@ -18,6 +18,9 @@ PreprocessNotePosition:Execute(
     Set(EntityData *NoteTailX2 Add(NoteTailX HalfNoteWidth))
 )
 
+SpawnOrderHead:NoteHeadTime
+SpawnOrderTail:NoteTailTime
+
 IsNoteHeadOnScreen:LessOr(Subtract(NoteHeadTime Time) NoteScreenTime)
 IsNoteTailOnScreen:LessOr(Subtract(NoteTailTime Time) NoteScreenTime)
 
@@ -28,8 +31,8 @@ InitNoteHead:Execute(
 )
 InitSimLine:And(
     SimLine
-    NoteSimLineIndex
-    Spawn(7 Index NoteSimLineIndex)
+    NoteHasSimLine
+    Spawn(7 Index)
 )
 
 InitAutoNormal:And(
@@ -354,6 +357,8 @@ InputOffset:Add(DeviceInputOffset Divide(LevelInputOffset 1000))
     SetShifted(LevelUI *UIScoreValue *UIHorizontalAlign 1)
 )
 
+#0.spawnOrder:-1000
+
 #0.updateSequential:true
 
 
@@ -369,6 +374,8 @@ StageBorderBR:Multiply(3.75 LaneWidth)
 StageBorderTL:Multiply(0.05 StageBorderBL)
 StageBorderTR:Multiply(0.05 StageBorderBR)
 StageCoverY:Lerp(LaneY2 LaneY1 StageCover)
+
+#1.spawnOrder:-999
 
 #1.shouldSpawn:Equal(Get(EntityInfoArray *State) Despawned)
 
@@ -516,6 +523,8 @@ StageCoverY:Lerp(LaneY2 LaneY1 StageCover)
 
 #2.preprocess:PreprocessNotePosition
 
+#2.spawnOrder:SpawnOrderTail
+
 #2.shouldSpawn:IsNoteTailOnScreen
 
 #2.initialize:Execute(
@@ -572,6 +581,8 @@ StageCoverY:Lerp(LaneY2 LaneY1 StageCover)
 // #3: Flick Note
 
 #3.preprocess:PreprocessNotePosition
+
+#3.spawnOrder:SpawnOrderTail
 
 #3.shouldSpawn:IsNoteTailOnScreen
 
@@ -650,6 +661,8 @@ StageCoverY:Lerp(LaneY2 LaneY1 StageCover)
 
 #4.preprocess:PreprocessNotePosition
 
+#4.spawnOrder:SpawnOrderHead
+
 #4.shouldSpawn:IsNoteHeadOnScreen
 
 #4.initialize:Execute(
@@ -724,6 +737,8 @@ StageCoverY:Lerp(LaneY2 LaneY1 StageCover)
 // #5: Slide Release Note
 
 #5.preprocess:PreprocessNotePosition
+
+#5.spawnOrder:SpawnOrderHead
 
 #5.shouldSpawn:IsNoteHeadOnScreen
 
@@ -801,6 +816,8 @@ StageCoverY:Lerp(LaneY2 LaneY1 StageCover)
 // #6: Slide Flick Note
 
 #6.preprocess:PreprocessNotePosition
+
+#6.spawnOrder:SpawnOrderHead
 
 #6.shouldSpawn:IsNoteHeadOnScreen
 
@@ -886,6 +903,7 @@ StageCoverY:Lerp(LaneY2 LaneY1 StageCover)
 // #7: Sim Line
 
 #7.initialize:Execute(
+    Set(EntityMemory *SimLineIndex2 Subtract(SimLineIndex1 1))
     Set(EntityMemory *SimLineTime SimLineTime1)
     Set(EntityMemory *SimLineX1 Multiply(SimLineLane1 LaneWidth))
     Set(EntityMemory *SimLineX2 Multiply(SimLineLane2 LaneWidth))
@@ -1271,7 +1289,7 @@ NoteHeadInputTouchID:GetShifted(EntitySharedMemoryArray NoteHeadSharedMemoryOffs
 *NoteHeadIndex:0
 *NoteTailTime:1
 *NoteTailLane:2
-*NoteSimLineIndex:3
+*NoteHasSimLine:3
 *NoteBucket:4
 *NoteTexture:5
 *NoteTailX:16
@@ -1281,7 +1299,7 @@ NoteHeadInputTouchID:GetShifted(EntitySharedMemoryArray NoteHeadSharedMemoryOffs
 NoteHeadIndex:Get(EntityData *NoteHeadIndex)
 NoteTailTime:Get(EntityData *NoteTailTime)
 NoteTailLane:Get(EntityData *NoteTailLane)
-NoteSimLineIndex:Get(EntityData *NoteSimLineIndex)
+NoteHasSimLine:Get(EntityData *NoteHasSimLine)
 NoteBucket:Get(EntityData *NoteBucket)
 NoteTexture:Get(EntityData *NoteTexture)
 NoteTailX:Get(EntityData *NoteTailX)
