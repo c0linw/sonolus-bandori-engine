@@ -229,6 +229,18 @@ PlayFlickEffect:And(
         )
     )
 )
+PlayLaneEffect:And(
+    LaneEffect
+    SpawnParticleEffect(
+        ParticleEffectLaneL
+        GetShifted(LevelData *LaneBX Add(NoteTailLane 3)) LaneY1
+        GetShifted(LevelData *LaneTX Add(NoteTailLane 3)) LaneY2
+        GetShifted(LevelData *LaneTX Add(NoteTailLane 4)) LaneY2
+        GetShifted(LevelData *LaneBX Add(NoteTailLane 4)) LaneY1
+        0.2
+        0
+    )
+)
 
 PlayJudgmentSound:And(
     SoundEffect
@@ -487,6 +499,7 @@ StageCoverY:Lerp(LaneY2 LaneY1 StageCover)
     And(
         TempTouchStarted
         IsTouchY
+        Not(TempTouchOccupied)
         Execute(
             Set(EntityMemory *Looper 0)
             While(
@@ -495,22 +508,17 @@ StageCoverY:Lerp(LaneY2 LaneY1 StageCover)
                     GreaterOr(TempTouchX GetShifted(LevelData *LaneBX Looper))
                     LessOr(TempTouchX GetShifted(LevelData *LaneBX Add(Looper 1)))
                     Execute(
+                        PlayEmptySound
                         And(
-                            Not(TempTouchOccupied)
-                            Execute(
-                                PlayEmptySound
-                                And(
-                                    SlotEffect
-                                    SpawnParticleEffect(
-                                        ParticleEffectSlotL
-                                        Subtract(Multiply(Subtract(Looper 3) LaneWidth) HalfTapEffectLWidth) LaneY1
-                                        Subtract(Multiply(Subtract(Looper 3) LaneWidth) HalfTapEffectLWidth) TapEffectLY2
-                                        Add(Multiply(Subtract(Looper 3) LaneWidth) HalfTapEffectLWidth) TapEffectLY2
-                                        Add(Multiply(Subtract(Looper 3) LaneWidth) HalfTapEffectLWidth) LaneY1
-                                        0.6
-                                        0
-                                    )
-                                )
+                            SlotEffect
+                            SpawnParticleEffect(
+                                ParticleEffectSlotL
+                                Subtract(Multiply(Subtract(Looper 3) LaneWidth) HalfTapEffectLWidth) LaneY1
+                                Subtract(Multiply(Subtract(Looper 3) LaneWidth) HalfTapEffectLWidth) TapEffectLY2
+                                Add(Multiply(Subtract(Looper 3) LaneWidth) HalfTapEffectLWidth) TapEffectLY2
+                                Add(Multiply(Subtract(Looper 3) LaneWidth) HalfTapEffectLWidth) LaneY1
+                                0.6
+                                0
                             )
                         )
                         And(
@@ -565,6 +573,7 @@ StageCoverY:Lerp(LaneY2 LaneY1 StageCover)
             Set(EntityInput *Judgment JudgeSimple(Subtract(TempTouchST InputOffset) NoteTailTime PerfectWindow GreatWindow GoodWindow))
             Set(EntityInput *Bucket NoteBucket)
             Set(EntityInput *BucketValue Multiply(1000 Subtract(TempTouchST InputOffset NoteTailTime)))
+            PlayLaneEffect
             PlayTapEffect
             PlayJudgmentSound
         )
@@ -634,6 +643,7 @@ StageCoverY:Lerp(LaneY2 LaneY1 StageCover)
                         Set(EntityInput *Judgment JudgeSimple(Subtract(ActivationTime InputOffset) NoteTailTime PerfectWindow GreatWindow GoodWindow))
                         Set(EntityInput *Bucket NoteBucket)
                         Set(EntityInput *BucketValue Multiply(1000 Subtract(ActivationTime InputOffset NoteTailTime)))
+                        PlayLaneEffect
                         PlayFlickEffect
                         PlayFlickSound
                     )
@@ -697,6 +707,7 @@ StageCoverY:Lerp(LaneY2 LaneY1 StageCover)
                         Set(EntityInput *Judgment JudgeSimple(Subtract(Time InputOffset) NoteTailTime PerfectWindow GreatWindow GoodWindow))
                         Set(EntityInput *Bucket NoteBucket)
                         Set(EntityInput *BucketValue Multiply(1000 Subtract(Time InputOffset NoteTailTime)))
+                        PlayLaneEffect
                         PlayTapEffect
                         PlayJudgmentSound
                     )
@@ -771,6 +782,7 @@ StageCoverY:Lerp(LaneY2 LaneY1 StageCover)
                         Set(EntityInput *Judgment JudgeSimple(Subtract(TempTouchT InputOffset) NoteTailTime PerfectWindow GreatWindow GoodWindow))
                         Set(EntityInput *Bucket NoteBucket)
                         Set(EntityInput *BucketValue Multiply(1000 Subtract(TempTouchT InputOffset NoteTailTime)))
+                        PlayLaneEffect
                         PlayTapEffect
                         PlayJudgmentSound
                     )
@@ -850,6 +862,7 @@ StageCoverY:Lerp(LaneY2 LaneY1 StageCover)
                         Set(EntityInput *Judgment JudgeSimple(Subtract(Time InputOffset) NoteTailTime PerfectWindow GreatWindow GoodWindow))
                         Set(EntityInput *Bucket NoteBucket)
                         Set(EntityInput *BucketValue Multiply(1000 Subtract(Time InputOffset NoteTailTime)))
+                        PlayLaneEffect
                         PlayFlickEffect
                         PlayFlickSound
                     )
