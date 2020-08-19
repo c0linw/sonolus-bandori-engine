@@ -40,6 +40,16 @@ InitAuto:And(
     Execute(
         Set(EntityInput *Judgment JudgmentPerfect)
         Set(EntityInput *Bucket NoteBucket)
+        Spawn(
+            8
+            Or(
+                Equal(Archetype 4)
+                Equal(Archetype 7)
+            )
+            NoteTailTime
+            NoteTailLane
+            NoteTailX
+        )
     )
 )
 
@@ -210,18 +220,6 @@ PlayFlickEffect:And(
             0.6
             0
         )
-    )
-)
-PlayAutoLaneEffect:And(
-    LaneEffect
-    SpawnParticleEffect(
-        ParticleEffectLaneL
-        GetShifted(LevelData *LaneBX Add(NoteTailLane 3)) LaneY1
-        GetShifted(LevelData *LaneTX Add(NoteTailLane 3)) LaneY2
-        GetShifted(LevelData *LaneTX Add(NoteTailLane 4)) LaneY2
-        GetShifted(LevelData *LaneBX Add(NoteTailLane 4)) LaneY1
-        0.2
-        0
     )
 )
 
@@ -572,11 +570,6 @@ StageCoverY:Lerp(LaneY2 LaneY1 StageCover)
         And(
             Auto
             GreaterOr(Time NoteTailTime)
-            Execute(
-                PlayTapEffect
-                PlayAutoLaneEffect
-                true
-            )
         )
         Equal(InputState Terminated)
         Greater(Subtract(NoteTailTimeDistance InputOffset) GoodWindow)
@@ -650,11 +643,6 @@ StageCoverY:Lerp(LaneY2 LaneY1 StageCover)
         And(
             Auto
             GreaterOr(Time NoteTailTime)
-            Execute(
-                PlayFlickEffect
-                PlayAutoLaneEffect
-                true
-            )
         )
         Equal(InputState Terminated)
         Greater(Subtract(NoteTailTimeDistance InputOffset) GoodWindow)
@@ -719,11 +707,6 @@ StageCoverY:Lerp(LaneY2 LaneY1 StageCover)
         And(
             Auto
             GreaterOr(Time NoteTailTime)
-            Execute(
-                PlayTapEffect
-                PlayAutoLaneEffect
-                true
-            )
         )
         And(
             Not(Auto)
@@ -798,11 +781,6 @@ StageCoverY:Lerp(LaneY2 LaneY1 StageCover)
         And(
             Auto
             GreaterOr(Time NoteTailTime)
-            Execute(
-                PlayTapEffect
-                PlayAutoLaneEffect
-                true
-            )
         )
         Equal(InputState Terminated)
         And(
@@ -882,11 +860,6 @@ StageCoverY:Lerp(LaneY2 LaneY1 StageCover)
         And(
             Auto
             GreaterOr(Time NoteTailTime)
-            Execute(
-                PlayFlickEffect
-                PlayAutoLaneEffect
-                true
-            )
         )
         Equal(InputState Terminated)
         And(
@@ -946,6 +919,62 @@ StageCoverY:Lerp(LaneY2 LaneY1 StageCover)
                 1
             )
         )
+    )
+)
+
+
+
+// #8: Auto Companion
+
+#8.updateParallel:And(
+    GreaterOr(Time CompanionTailTime)
+    Execute(
+        And(
+            NoteEffect
+            Execute(
+                SpawnParticleEffect(
+                    If(
+                        CompanionIsFlick
+                        ParticleEffectTapFlickL
+                        ParticleEffectTapNormalL
+                    )
+                    Subtract(CompanionTailX HalfTapEffectLWidth) LaneY1
+                    Subtract(CompanionTailX HalfTapEffectLWidth) TapEffectLY2
+                    Add(CompanionTailX HalfTapEffectLWidth) TapEffectLY2
+                    Add(CompanionTailX HalfTapEffectLWidth) LaneY1
+                    0.4
+                    0
+                )
+                SpawnParticleEffect(
+                    If(
+                        CompanionIsFlick
+                        ParticleEffectTapFlickC
+                        ParticleEffectTapNormalC
+                    )
+                    Subtract(CompanionTailX HalfTapEffectCWidth) TapEffectCY1
+                    Subtract(CompanionTailX HalfTapEffectCWidth) TapEffectCY2
+                    Add(CompanionTailX HalfTapEffectCWidth) TapEffectCY2
+                    Add(CompanionTailX HalfTapEffectCWidth) TapEffectCY1
+                    0.6
+                    0
+                )
+            )
+        )
+
+        And(
+            LaneEffect
+            SpawnParticleEffect(
+                ParticleEffectLaneL
+                GetShifted(LevelData *LaneBX Add(CompanionTailLane 3)) LaneY1
+                GetShifted(LevelData *LaneTX Add(CompanionTailLane 3)) LaneY2
+                GetShifted(LevelData *LaneTX Add(CompanionTailLane 4)) LaneY2
+                GetShifted(LevelData *LaneBX Add(CompanionTailLane 4)) LaneY1
+                0.2
+                0
+            )
+        )
+
+        true
     )
 )
 
@@ -1370,3 +1399,17 @@ SimLineInfoOffset1:Multiply(SimLineIndex1 3)
 SimLineInfoOffset2:Multiply(SimLineIndex2 3)
 SimLineDataOffset1:Multiply(SimLineIndex1 32)
 SimLineDataOffset2:Multiply(SimLineIndex2 32)
+
+
+
+// #8 Memory Layout
+
+*CompanionIsFlick:0
+*CompanionTailTime:1
+*CompanionTailLane:2
+*CompanionTailX:3
+
+CompanionIsFlick:Get(EntityMemory *CompanionIsFlick)
+CompanionTailTime:Get(EntityMemory *CompanionTailTime)
+CompanionTailLane:Get(EntityMemory *CompanionTailLane)
+CompanionTailX:Get(EntityMemory *CompanionTailX)
