@@ -35,24 +35,9 @@ InitSimLine:And(
     Spawn(7 Index)
 )
 
-InitAutoNormal:And(
+InitAuto:And(
     Auto
     Execute(
-        And(
-            SoundEffect
-            PlayScheduled(EffectPerfect NoteTailTime MinEffectTime)
-        )
-        Set(EntityInput *Judgment JudgmentPerfect)
-        Set(EntityInput *Bucket NoteBucket)
-    )
-)
-InitAutoFlick:And(
-    Auto
-    Execute(
-        And(
-            SoundEffect
-            PlayScheduled(EffectFlick NoteTailTime MinEffectTime)
-        )
         Set(EntityInput *Judgment JudgmentPerfect)
         Set(EntityInput *Bucket NoteBucket)
     )
@@ -380,6 +365,9 @@ StageCoverY:Lerp(LaneY2 LaneY1 StageCover)
 #1.shouldSpawn:Equal(Get(EntityInfoArray *State) Despawned)
 
 #1.initialize:Execute(
+    Set(EntityMemory *AutoNoteInfoOffset 6)
+    Set(EntityMemory *AutoNoteDataOffset 64)
+
     Set(EntityMemory *Looper 0)
     While(
         Less(Looper 7)
@@ -400,6 +388,29 @@ StageCoverY:Lerp(LaneY2 LaneY1 StageCover)
 )
 
 #1.updateParallel:Execute(
+    And(
+        Auto
+        SoundEffect
+        And(AutoNoteArchetype)
+        GreaterOr(Time Subtract(AutoNoteTailTime 10))
+        Execute(
+            PlayScheduled(
+                If(
+                    Or(
+                        Equal(AutoNoteArchetype 4)
+                        Equal(AutoNoteArchetype 7)
+                    )
+                    EffectFlick
+                    EffectPerfect
+                )
+                AutoNoteTailTime
+                MinEffectTime
+            )
+            Set(EntityMemory *AutoNoteInfoOffset Add(AutoNoteInfoOffset 3))
+            Set(EntityMemory *AutoNoteDataOffset Add(AutoNoteDataOffset 32))
+        )
+    )
+
     And(
         StageCover
         Draw(
@@ -529,7 +540,7 @@ StageCoverY:Lerp(LaneY2 LaneY1 StageCover)
 
 #2.initialize:Execute(
     InitSimLine
-    InitAutoNormal
+    InitAuto
 )
 
 #2.touch:Or(
@@ -588,7 +599,7 @@ StageCoverY:Lerp(LaneY2 LaneY1 StageCover)
 
 #3.initialize:Execute(
     InitSimLine
-    InitAutoFlick
+    InitAuto
 )
 
 #3.touch:Or(
@@ -667,7 +678,7 @@ StageCoverY:Lerp(LaneY2 LaneY1 StageCover)
 
 #4.initialize:Execute(
     InitNoteHead
-    InitAutoNormal
+    InitAuto
 )
 
 #4.touch:Or(
@@ -745,7 +756,7 @@ StageCoverY:Lerp(LaneY2 LaneY1 StageCover)
 #5.initialize:Execute(
     InitNoteHead
     InitSimLine
-    InitAutoNormal
+    InitAuto
 )
 
 #5.touch:Or(
@@ -824,7 +835,7 @@ StageCoverY:Lerp(LaneY2 LaneY1 StageCover)
 #6.initialize:Execute(
     InitNoteHead
     InitSimLine
-    InitAutoFlick
+    InitAuto
 )
 
 #6.touch:Or(
@@ -1156,6 +1167,8 @@ Index:Get(EntityInfo *Index)
 Archetype:Get(EntityInfo *Archetype)
 State:Get(EntityInfo *State)
 
+AutoNoteArchetype:GetShifted(EntityInfoArray AutoNoteInfoOffset *Archetype)
+
 NoteHeadState:GetShifted(EntityInfoArray NoteHeadInfoOffset *State)
 
 SimLineState1:GetShifted(EntityInfoArray SimLineInfoOffset1 *State)
@@ -1228,10 +1241,15 @@ Looper:Get(EntityMemory *Looper)
 
 // #1 Memory Layout
 
-*SlotX1:0
-*SlotX2:7
-*SlotY1:14
-*SlotY2:21
+*AutoNoteInfoOffset:0
+*AutoNoteDataOffset:1
+*SlotX1:2
+*SlotX2:9
+*SlotY1:16
+*SlotY2:23
+
+AutoNoteInfoOffset:Get(EntityMemory *AutoNoteInfoOffset)
+AutoNoteDataOffset:Get(EntityMemory *AutoNoteDataOffset)
 
 
 
@@ -1309,6 +1327,8 @@ NoteTailX2:Get(EntityData *NoteTailX2)
 NoteHeadInfoOffset:Multiply(NoteHeadIndex 3)
 NoteHeadDataOffset:Multiply(NoteHeadIndex 32)
 NoteHeadSharedMemoryOffset:Multiply(NoteHeadIndex 32)
+
+AutoNoteTailTime:GetShifted(EntityDataArray AutoNoteDataOffset *NoteTailTime)
 
 NoteHeadTime:GetShifted(EntityDataArray NoteHeadDataOffset *NoteTailTime)
 NoteHeadLane:GetShifted(EntityDataArray NoteHeadDataOffset *NoteTailLane)
