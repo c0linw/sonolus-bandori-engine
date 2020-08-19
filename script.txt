@@ -43,6 +43,13 @@ InitAuto:And(
         Spawn(
             8
             Or(
+                Equal(Archetype 5)
+                Equal(Archetype 6)
+                Equal(Archetype 7)
+            )
+            NoteHeadTime
+            NoteHeadLane
+            Or(
                 Equal(Archetype 4)
                 Equal(Archetype 7)
             )
@@ -926,6 +933,22 @@ StageCoverY:Lerp(LaneY2 LaneY1 StageCover)
 
 // #8: Auto Companion
 
+#8.initialize:And(
+    CompanionHasHead
+    Set(EntityMemory *CompanionHeadX Multiply(LaneWidth CompanionHeadLane))
+)
+
+#8.updateSequential:And(
+    StageTilt
+    CompanionHasHead
+    GreaterOr(Time CompanionHeadTime)
+    Less(Time CompanionTailTime)
+    Execute(
+        Set(EntityMemory *CompanionHeadCurrentX RemapClamped(CompanionHeadTime CompanionTailTime CompanionHeadX CompanionTailX Time))
+        Set(LevelMemory *Tilt Add(Tilt CompanionHeadCurrentX))
+    )
+)
+
 #8.updateParallel:And(
     GreaterOr(Time CompanionTailTime)
     Execute(
@@ -1404,12 +1427,22 @@ SimLineDataOffset2:Multiply(SimLineIndex2 32)
 
 // #8 Memory Layout
 
-*CompanionIsFlick:0
-*CompanionTailTime:1
-*CompanionTailLane:2
-*CompanionTailX:3
+*CompanionHasHead:0
+*CompanionHeadTime:1
+*CompanionHeadLane:2
+*CompanionIsFlick:3
+*CompanionTailTime:4
+*CompanionTailLane:5
+*CompanionTailX:6
+*CompanionHeadX:7
+*CompanionHeadCurrentX:8
 
+CompanionHasHead:Get(EntityMemory *CompanionHasHead)
+CompanionHeadTime:Get(EntityMemory *CompanionHeadTime)
+CompanionHeadLane:Get(EntityMemory *CompanionHeadLane)
 CompanionIsFlick:Get(EntityMemory *CompanionIsFlick)
 CompanionTailTime:Get(EntityMemory *CompanionTailTime)
 CompanionTailLane:Get(EntityMemory *CompanionTailLane)
 CompanionTailX:Get(EntityMemory *CompanionTailX)
+CompanionHeadX:Get(EntityMemory *CompanionHeadX)
+CompanionHeadCurrentX:Get(EntityMemory *CompanionHeadCurrentX)
