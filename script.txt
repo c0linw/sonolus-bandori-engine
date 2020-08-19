@@ -10,6 +10,14 @@
 
 // Note Class
 
+PreprocessNotePosition:Execute(
+    Set(EntityData *NoteTailTime Divide(Add(NoteTailTime NoteTimeOffset) Speed))
+    Set(EntityData *NoteTailLane Multiply(NoteTailLane MirrorMultiplier))
+    Set(EntityData *NoteTailX Multiply(LaneWidth NoteTailLane))
+    Set(EntityData *NoteTailX1 Subtract(NoteTailX HalfNoteWidth))
+    Set(EntityData *NoteTailX2 Add(NoteTailX HalfNoteWidth))
+)
+
 IsNoteHeadOnScreen:LessOr(Subtract(NoteHeadTime Time) NoteScreenTime)
 IsNoteTailOnScreen:LessOr(Subtract(NoteTailTime Time) NoteScreenTime)
 
@@ -17,11 +25,6 @@ InitNoteHead:Execute(
     Set(EntityMemory *NoteHeadX Multiply(LaneWidth NoteHeadLane))
     Set(EntityMemory *NoteHeadX1 Subtract(NoteHeadX HalfNoteWidth))
     Set(EntityMemory *NoteHeadX2 Add(NoteHeadX HalfNoteWidth))
-)
-InitNoteTail:Execute(
-    Set(EntityMemory *NoteTailX Multiply(LaneWidth NoteTailLane))
-    Set(EntityMemory *NoteTailX1 Subtract(NoteTailX HalfNoteWidth))
-    Set(EntityMemory *NoteTailX2 Add(NoteTailX HalfNoteWidth))
 )
 InitSimLine:And(
     SimLine
@@ -511,10 +514,11 @@ StageCoverY:Lerp(LaneY2 LaneY1 StageCover)
 
 // #2: Tap Note
 
+#2.preprocess:PreprocessNotePosition
+
 #2.shouldSpawn:IsNoteTailOnScreen
 
 #2.initialize:Execute(
-    InitNoteTail
     InitSimLine
     InitAutoNormal
 )
@@ -567,10 +571,11 @@ StageCoverY:Lerp(LaneY2 LaneY1 StageCover)
 
 // #3: Flick Note
 
+#3.preprocess:PreprocessNotePosition
+
 #3.shouldSpawn:IsNoteTailOnScreen
 
 #3.initialize:Execute(
-    InitNoteTail
     InitSimLine
     InitAutoFlick
 )
@@ -643,11 +648,12 @@ StageCoverY:Lerp(LaneY2 LaneY1 StageCover)
 
 // #4: Slide Touch Note
 
+#4.preprocess:PreprocessNotePosition
+
 #4.shouldSpawn:IsNoteHeadOnScreen
 
 #4.initialize:Execute(
     InitNoteHead
-    InitNoteTail
     InitAutoNormal
 )
 
@@ -717,11 +723,12 @@ StageCoverY:Lerp(LaneY2 LaneY1 StageCover)
 
 // #5: Slide Release Note
 
+#5.preprocess:PreprocessNotePosition
+
 #5.shouldSpawn:IsNoteHeadOnScreen
 
 #5.initialize:Execute(
     InitNoteHead
-    InitNoteTail
     InitSimLine
     InitAutoNormal
 )
@@ -793,11 +800,12 @@ StageCoverY:Lerp(LaneY2 LaneY1 StageCover)
 
 // #6: Slide Flick Note
 
+#6.preprocess:PreprocessNotePosition
+
 #6.shouldSpawn:IsNoteHeadOnScreen
 
 #6.initialize:Execute(
     InitNoteHead
-    InitNoteTail
     InitSimLine
     InitAutoFlick
 )
@@ -1223,12 +1231,9 @@ Looper:Get(EntityMemory *Looper)
 *NoteTailScale:41
 *NoteTailScale1:42
 *NoteTailScale2:43
-*NoteTailX:44
-*NoteTailX1:45
-*NoteTailX2:46
-*NoteTailY:47
-*NoteTailY1:48
-*NoteTailY2:49
+*NoteTailY:44
+*NoteTailY1:45
+*NoteTailY2:46
 
 InputState:Get(EntityMemory *InputState)
 ActivationTime:Get(EntityMemory *ActivationTime)
@@ -1242,9 +1247,6 @@ NoteTailTimeDistance:Get(EntityMemory *NoteTailTimeDistance)
 NoteTailScale:Get(EntityMemory *NoteTailScale)
 NoteTailScale1:Get(EntityMemory *NoteTailScale1)
 NoteTailScale2:Get(EntityMemory *NoteTailScale2)
-NoteTailX:Get(EntityMemory *NoteTailX)
-NoteTailX1:Get(EntityMemory *NoteTailX1)
-NoteTailX2:Get(EntityMemory *NoteTailX2)
 NoteTailY:Get(EntityMemory *NoteTailY)
 NoteTailY1:Get(EntityMemory *NoteTailY1)
 NoteTailY2:Get(EntityMemory *NoteTailY2)
@@ -1272,25 +1274,31 @@ NoteHeadInputTouchID:GetShifted(EntitySharedMemoryArray NoteHeadSharedMemoryOffs
 *NoteSimLineIndex:3
 *NoteBucket:4
 *NoteTexture:5
+*NoteTailX:16
+*NoteTailX1:17
+*NoteTailX2:18
 
 NoteHeadIndex:Get(EntityData *NoteHeadIndex)
-NoteTailTime:Divide(Add(Get(EntityData *NoteTailTime) NoteTimeOffset) Speed)
-NoteTailLane:Multiply(Get(EntityData *NoteTailLane) MirrorMultiplier)
+NoteTailTime:Get(EntityData *NoteTailTime)
+NoteTailLane:Get(EntityData *NoteTailLane)
 NoteSimLineIndex:Get(EntityData *NoteSimLineIndex)
 NoteBucket:Get(EntityData *NoteBucket)
 NoteTexture:Get(EntityData *NoteTexture)
+NoteTailX:Get(EntityData *NoteTailX)
+NoteTailX1:Get(EntityData *NoteTailX1)
+NoteTailX2:Get(EntityData *NoteTailX2)
 
 NoteHeadInfoOffset:Multiply(NoteHeadIndex 3)
 NoteHeadDataOffset:Multiply(NoteHeadIndex 32)
 NoteHeadSharedMemoryOffset:Multiply(NoteHeadIndex 32)
 
-NoteHeadTime:Divide(Add(GetShifted(EntityDataArray NoteHeadDataOffset *NoteTailTime) NoteTimeOffset) Speed)
-NoteHeadLane:Multiply(GetShifted(EntityDataArray NoteHeadDataOffset *NoteTailLane) MirrorMultiplier)
+NoteHeadTime:GetShifted(EntityDataArray NoteHeadDataOffset *NoteTailTime)
+NoteHeadLane:GetShifted(EntityDataArray NoteHeadDataOffset *NoteTailLane)
 
-SimLineTime1:Divide(Add(GetShifted(EntityDataArray SimLineDataOffset1 *NoteTailTime) NoteTimeOffset) Speed)
-SimLineTime2:Divide(Add(GetShifted(EntityDataArray SimLineDataOffset2 *NoteTailTime) NoteTimeOffset) Speed)
-SimLineLane1:Multiply(GetShifted(EntityDataArray SimLineDataOffset1 *NoteTailLane) MirrorMultiplier)
-SimLineLane2:Multiply(GetShifted(EntityDataArray SimLineDataOffset2 *NoteTailLane) MirrorMultiplier)
+SimLineTime1:GetShifted(EntityDataArray SimLineDataOffset1 *NoteTailTime)
+SimLineTime2:GetShifted(EntityDataArray SimLineDataOffset2 *NoteTailTime)
+SimLineLane1:GetShifted(EntityDataArray SimLineDataOffset1 *NoteTailLane)
+SimLineLane2:GetShifted(EntityDataArray SimLineDataOffset2 *NoteTailLane)
 
 
 
