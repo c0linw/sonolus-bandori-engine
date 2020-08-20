@@ -76,6 +76,7 @@ ProcessTouchHead:And(
                 Set(TemporaryMemory *TempTouchOccupied true)
                 Set(EntityMemory *InputState Activated)
                 Set(EntitySharedMemory *InputTouchID TempTouchID)
+                SpawnHoldEffect
             )
         )
         And(
@@ -89,6 +90,7 @@ ProcessTouchHead:And(
                 Set(TemporaryMemory *TempTouchOccupied true)
                 Set(EntityMemory *InputState Activated)
                 Set(EntitySharedMemory *InputTouchID TempTouchID)
+                SpawnHoldEffect
             )
         )
     )
@@ -162,10 +164,57 @@ DrawNoteSlide:And(
                     LayerNoteSlide
                     1
                 )
+
+                And(
+                    Not(Auto)
+                    NoteEffect
+                    Execute(
+                        MoveParticleEffect(
+                            HoldEffectLID
+                            Subtract(NoteHeadX HalfTapEffectLWidth) LaneY1
+                            Subtract(NoteHeadX HalfTapEffectLWidth) TapEffectLY2
+                            Add(NoteHeadX HalfTapEffectLWidth) TapEffectLY2
+                            Add(NoteHeadX HalfTapEffectLWidth) LaneY1
+                        )
+                        MoveParticleEffect(
+                            HoldEffectCID
+                            Subtract(NoteHeadX HalfHoldEffectCWidth) HoldEffectCY1
+                            Subtract(NoteHeadX HalfHoldEffectCWidth) HoldEffectCY2
+                            Add(NoteHeadX HalfHoldEffectCWidth) HoldEffectCY2
+                            Add(NoteHeadX HalfHoldEffectCWidth) HoldEffectCY1
+                        )
+                    )
+                )
             )
             Execute(
                 Set(EntityMemory *NoteHeadScale Add(0.05 Multiply(0.95 Power(117.39085 Divide(NoteHeadTimeDistance NoteScreenTime)))))
                 Set(EntityMemory *NoteHeadY Add(LaneYOffset Multiply(LaneYMultiplier NoteHeadScale)))
+            )
+        )
+
+        And(
+            Not(Auto)
+            NoteEffect
+            GreaterOr(Time NoteHeadTime)
+            Not(InputState)
+            NoteHeadHoldEffectLID
+            Execute(
+                Set(EntityMemory *NoteHeadX Multiply(LaneWidth RemapClamped(NoteHeadTime NoteTailTime NoteHeadLane NoteTailLane Time)))
+
+                MoveParticleEffect(
+                    NoteHeadHoldEffectLID
+                    Subtract(NoteHeadX HalfTapEffectLWidth) LaneY1
+                    Subtract(NoteHeadX HalfTapEffectLWidth) TapEffectLY2
+                    Add(NoteHeadX HalfTapEffectLWidth) TapEffectLY2
+                    Add(NoteHeadX HalfTapEffectLWidth) LaneY1
+                )
+                MoveParticleEffect(
+                    NoteHeadHoldEffectCID
+                    Subtract(NoteHeadX HalfHoldEffectCWidth) HoldEffectCY1
+                    Subtract(NoteHeadX HalfHoldEffectCWidth) HoldEffectCY2
+                    Add(NoteHeadX HalfHoldEffectCWidth) HoldEffectCY2
+                    Add(NoteHeadX HalfHoldEffectCWidth) HoldEffectCY1
+                )
             )
         )
 
@@ -181,6 +230,40 @@ DrawNoteSlide:And(
             ConnectorAlpha
         )
     )
+)
+
+SpawnHoldEffect:And(
+    NoteEffect
+    Execute(
+        Set(EntitySharedMemory *HoldEffectLID
+            SpawnParticleEffect(
+                ParticleEffectTapHoldL
+                Subtract(NoteHeadX HalfTapEffectLWidth) LaneY1
+                Subtract(NoteHeadX HalfTapEffectLWidth) TapEffectLY2
+                Add(NoteHeadX HalfTapEffectLWidth) TapEffectLY2
+                Add(NoteHeadX HalfTapEffectLWidth) LaneY1
+                1
+                1
+            )
+        )
+        Set(EntitySharedMemory *HoldEffectCID
+            SpawnParticleEffect(
+                ParticleEffectTapHoldC
+                Subtract(NoteHeadX HalfHoldEffectCWidth) HoldEffectCY1
+                Subtract(NoteHeadX HalfHoldEffectCWidth) HoldEffectCY2
+                Add(NoteHeadX HalfHoldEffectCWidth) HoldEffectCY2
+                Add(NoteHeadX HalfHoldEffectCWidth) HoldEffectCY1
+                1
+                1
+            )
+        )
+    )
+)
+DestroyHoldEffect:Or(
+    Not(NoteEffect)
+    DestroyParticleEffect(HoldEffectLID)
+    DestroyParticleEffect(HoldEffectCID)
+    true
 )
 
 PlayTapEffect:And(
@@ -292,6 +375,9 @@ HalfTapEffectLWidth:Multiply(HalfNoteWidth NoteEffectSize)
 HalfTapEffectCWidth:Multiply(HalfNoteWidth NoteEffectSize 3)
 TapEffectCY1:Subtract(LaneY1 Multiply(HalfNoteWidth NoteEffectSize 2))
 TapEffectCY2:Add(LaneY1 Multiply(HalfNoteWidth NoteEffectSize 2))
+HalfHoldEffectCWidth:Multiply(HalfNoteWidth NoteEffectSize 1.8)
+HoldEffectCY1:Subtract(LaneY1 Multiply(HalfNoteWidth NoteEffectSize 1.2))
+HoldEffectCY2:Add(LaneY1 Multiply(HalfNoteWidth NoteEffectSize 1.2))
 NoteScreenTime:Divide(Subtract(12 NoteSpeed) 2)
 NoteTimeOffset:Divide(LevelAudioOffset 1000)
 MirrorMultiplier:If(Mirror -1 1)
@@ -733,8 +819,14 @@ StageCoverY:Lerp(LaneY2 LaneY1 StageCover)
             Not(InputState)
             Greater(Subtract(NoteHeadTimeDistance InputOffset) GoodWindow)
         )
-        Equal(InputState Terminated)
-        Greater(Subtract(NoteTailTimeDistance InputOffset) GoodWindow)
+        And(
+            Equal(InputState Terminated)
+            DestroyHoldEffect
+        )
+        And(
+            Greater(Subtract(NoteTailTimeDistance InputOffset) GoodWindow)
+            DestroyHoldEffect
+        )
         Execute(
             UpdateNoteTailScale
             DrawNoteSlide
@@ -803,13 +895,19 @@ StageCoverY:Lerp(LaneY2 LaneY1 StageCover)
             Auto
             GreaterOr(Time NoteTailTime)
         )
-        Equal(InputState Terminated)
         And(
             Not(Auto)
             Not(InputState)
             Greater(Subtract(NoteHeadTimeDistance InputOffset) GoodWindow)
         )
-        Greater(Subtract(NoteTailTimeDistance InputOffset) GoodWindow)
+        And(
+            Equal(InputState Terminated)
+            DestroyHoldEffect
+        )
+        And(
+            Greater(Subtract(NoteTailTimeDistance InputOffset) GoodWindow)
+            DestroyHoldEffect
+        )
         Execute(
             UpdateNoteTailScale
             DrawNoteSlide
@@ -883,13 +981,19 @@ StageCoverY:Lerp(LaneY2 LaneY1 StageCover)
             Auto
             GreaterOr(Time NoteTailTime)
         )
-        Equal(InputState Terminated)
         And(
             Not(Auto)
             Not(InputState)
             Greater(Subtract(NoteHeadTimeDistance InputOffset) GoodWindow)
         )
-        Greater(Subtract(NoteTailTimeDistance InputOffset) GoodWindow)
+        And(
+            Equal(InputState Terminated)
+            DestroyHoldEffect
+        )
+        And(
+            Greater(Subtract(NoteTailTimeDistance InputOffset) GoodWindow)
+            DestroyHoldEffect
+        )
         Execute(
             UpdateNoteTailScale
             DrawNoteSlide
@@ -958,15 +1062,20 @@ StageCoverY:Lerp(LaneY2 LaneY1 StageCover)
     CompanionHasHead
     GreaterOr(Time CompanionHeadTime)
     Less(Time CompanionTailTime)
-    Execute(
-        Set(EntityMemory *CompanionHeadCurrentX RemapClamped(CompanionHeadTime CompanionTailTime CompanionHeadX CompanionTailX Time))
-        Set(LevelMemory *Tilt Add(Tilt CompanionHeadCurrentX))
-    )
+    Set(LevelMemory *Tilt Add(Tilt RemapClamped(CompanionHeadTime CompanionTailTime CompanionHeadX CompanionTailX Time)))
 )
 
-#8.updateParallel:And(
+#8.updateParallel:If(
     GreaterOr(Time CompanionTailTime)
     Execute(
+        And(
+            NoteEffect
+            Execute(
+                DestroyParticleEffect(CompanionHoldEffectLID)
+                DestroyParticleEffect(CompanionHoldEffectCID)
+            )
+        )
+
         And(
             NoteEffect
             Execute(
@@ -1013,6 +1122,56 @@ StageCoverY:Lerp(LaneY2 LaneY1 StageCover)
         )
 
         true
+    )
+    And(
+        NoteEffect
+        CompanionHasHead
+        GreaterOr(Time CompanionHeadTime)
+        Execute(
+            And(
+                Not(CompanionHoldEffectLID)
+                Execute(
+                    Set(EntityMemory *CompanionHoldEffectLID
+                        SpawnParticleEffect(
+                            ParticleEffectTapHoldL
+                            Subtract(CompanionHeadX HalfTapEffectLWidth) LaneY1
+                            Subtract(CompanionHeadX HalfTapEffectLWidth) TapEffectLY2
+                            Add(CompanionHeadX HalfTapEffectLWidth) TapEffectLY2
+                            Add(CompanionHeadX HalfTapEffectLWidth) LaneY1
+                            1
+                            1
+                        )
+                    )
+                    Set(EntityMemory *CompanionHoldEffectCID
+                        SpawnParticleEffect(
+                            ParticleEffectTapHoldC
+                            Subtract(CompanionHeadX HalfHoldEffectCWidth) HoldEffectCY1
+                            Subtract(CompanionHeadX HalfHoldEffectCWidth) HoldEffectCY2
+                            Add(CompanionHeadX HalfHoldEffectCWidth) HoldEffectCY2
+                            Add(CompanionHeadX HalfHoldEffectCWidth) HoldEffectCY1
+                            1
+                            1
+                        )
+                    )
+                )
+            )
+
+            Set(EntityMemory *CompanionHeadCurrentX RemapClamped(CompanionHeadTime CompanionTailTime CompanionHeadX CompanionTailX Time))
+            MoveParticleEffect(
+                CompanionHoldEffectLID
+                Subtract(CompanionHeadCurrentX HalfTapEffectLWidth) LaneY1
+                Subtract(CompanionHeadCurrentX HalfTapEffectLWidth) TapEffectLY2
+                Add(CompanionHeadCurrentX HalfTapEffectLWidth) TapEffectLY2
+                Add(CompanionHeadCurrentX HalfTapEffectLWidth) LaneY1
+            )
+            MoveParticleEffect(
+                CompanionHoldEffectCID
+                Subtract(CompanionHeadCurrentX HalfHoldEffectCWidth) HoldEffectCY1
+                Subtract(CompanionHeadCurrentX HalfHoldEffectCWidth) HoldEffectCY2
+                Add(CompanionHeadCurrentX HalfHoldEffectCWidth) HoldEffectCY2
+                Add(CompanionHeadCurrentX HalfHoldEffectCWidth) HoldEffectCY1
+            )
+        )
     )
 )
 
@@ -1095,6 +1254,8 @@ ParticleEffectTapNormalL:120006
 ParticleEffectTapNormalC:110006
 ParticleEffectTapFlickL:121001
 ParticleEffectTapFlickC:111001
+ParticleEffectTapHoldL:122002
+ParticleEffectTapHoldC:112002
 ParticleEffectLaneL:320000
 ParticleEffectSlotL:420000
 
@@ -1360,12 +1521,18 @@ NoteTailY2:Get(EntityMemory *NoteTailY2)
 
 *InputSuccess:0
 *InputTouchID:1
+*HoldEffectLID:2
+*HoldEffectCID:3
 
 InputSuccess:Get(EntitySharedMemory *InputSuccess)
 InputTouchID:Get(EntitySharedMemory *InputTouchID)
+HoldEffectLID:Get(EntitySharedMemory *HoldEffectLID)
+HoldEffectCID:Get(EntitySharedMemory *HoldEffectCID)
 
 NoteHeadInputSuccess:GetShifted(EntitySharedMemoryArray NoteHeadSharedMemoryOffset *InputSuccess)
 NoteHeadInputTouchID:GetShifted(EntitySharedMemoryArray NoteHeadSharedMemoryOffset *InputTouchID)
+NoteHeadHoldEffectLID:GetShifted(EntitySharedMemoryArray NoteHeadSharedMemoryOffset *HoldEffectLID)
+NoteHeadHoldEffectCID:GetShifted(EntitySharedMemoryArray NoteHeadSharedMemoryOffset *HoldEffectCID)
 
 
 
@@ -1451,6 +1618,8 @@ SimLineDataOffset2:Multiply(SimLineIndex2 32)
 *CompanionTailX:6
 *CompanionHeadX:7
 *CompanionHeadCurrentX:8
+*CompanionHoldEffectLID:9
+*CompanionHoldEffectCID:10
 
 CompanionHasHead:Get(EntityMemory *CompanionHasHead)
 CompanionHeadTime:Get(EntityMemory *CompanionHeadTime)
@@ -1461,3 +1630,5 @@ CompanionTailLane:Get(EntityMemory *CompanionTailLane)
 CompanionTailX:Get(EntityMemory *CompanionTailX)
 CompanionHeadX:Get(EntityMemory *CompanionHeadX)
 CompanionHeadCurrentX:Get(EntityMemory *CompanionHeadCurrentX)
+CompanionHoldEffectLID:Get(EntityMemory *CompanionHoldEffectLID)
+CompanionHoldEffectCID:Get(EntityMemory *CompanionHoldEffectCID)
