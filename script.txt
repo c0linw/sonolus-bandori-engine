@@ -12,6 +12,40 @@
 
 PreprocessNote:Execute(
     Set(EntityData *NoteTailTime Divide(Add(NoteTailTime NoteTimeOffset) Speed))
+
+    And(
+        NoteRandom
+        Execute(
+            Set(EntityData *NoteTailOriginalLane NoteTailLane)
+            Set(LevelMemory *NoteMinLane Max(-3 Subtract(NoteTailOriginalLane 2)))
+            Set(LevelMemory *NoteMaxLane Min(3 Add(NoteTailOriginalLane 2)))
+            And(
+                Or(
+                    Equal(Archetype 5)
+                    Equal(Archetype 6)
+                    Equal(Archetype 7)
+                )
+                Execute(
+                    Set(LevelMemory *NoteLaneDiff Add(1 Abs(Subtract(NoteTailOriginalLane NoteHeadOriginalLane))))
+                    Set(LevelMemory *NoteMinLane Max(NoteMinLane Subtract(NoteHeadLane NoteLaneDiff)))
+                    Set(LevelMemory *NoteMaxLane Min(NoteMaxLane Add(NoteHeadLane NoteLaneDiff)))
+                )
+            )
+            Set(LevelMemory *NoteNotLane
+                If(
+                    NoteHasSimLine
+                    GetShifted(EntityDataArray Multiply(Subtract(Index 1) 32) *NoteTailLane)
+                    999
+                )
+            )
+            Set(EntityData *NoteTailLane NoteNotLane)
+            While(
+                Equal(NoteTailLane NoteNotLane)
+                Set(EntityData *NoteTailLane RandomInteger(NoteMinLane Add(NoteMaxLane 1)))
+            )
+        )
+    )
+
     Set(EntityData *NoteTailLane Multiply(NoteTailLane MirrorMultiplier))
     Set(EntityData *NoteTailX Multiply(LaneWidth NoteTailLane))
     Set(EntityData *NoteTailX1 Subtract(NoteTailX HalfNoteWidth))
@@ -1297,6 +1331,20 @@ TemporaryData:101
 
 
 
+// Level Preprocess Memory Layout
+
+*NoteMinLane:0
+*NoteMaxLane:1
+*NoteNotLane:2
+*NoteLaneDiff:3
+
+NoteMinLane:Get(LevelMemory *NoteMinLane)
+NoteMaxLane:Get(LevelMemory *NoteMaxLane)
+NoteNotLane:Get(LevelMemory *NoteNotLane)
+NoteLaneDiff:Get(LevelMemory *NoteLaneDiff)
+
+
+
 // Level Memory Layout
 
 *Tilt:0
@@ -1329,29 +1377,31 @@ DeviceInputOffset:Get(LevelData *DeviceInputOffset)
 // Level Option Layout
 
 *Auto:0
-*NoteSpeedRandom:1
-*LevelAudioOffset:2
-*LevelInputOffset:3
-*Speed:4
-*NoteSpeed:5
-*NoteSize:6
-*NoteEffectSize:7
-*ConnectorAlpha:8
-*StageCover:9
-*Mirror:10
-*SimLine:11
-*SoundEffect:12
-*NoteEffect:13
-*LaneEffect:14
-*SlotEffect:15
-*StageTilt:16
-*StageAspectRatioLock:17
-*UIJudgmentSize:18
-*UIJudgmentAlpha:19
-*UIComboSize:20
-*UIComboAlpha:21
+*NoteRandom:1
+*NoteSpeedRandom:2
+*LevelAudioOffset:3
+*LevelInputOffset:4
+*Speed:5
+*NoteSpeed:6
+*NoteSize:7
+*NoteEffectSize:8
+*ConnectorAlpha:9
+*StageCover:10
+*Mirror:11
+*SimLine:12
+*SoundEffect:13
+*NoteEffect:14
+*LaneEffect:15
+*SlotEffect:16
+*StageTilt:17
+*StageAspectRatioLock:18
+*UIJudgmentSize:19
+*UIJudgmentAlpha:20
+*UIComboSize:21
+*UIComboAlpha:22
 
 Auto:Get(LevelOption *Auto)
+NoteRandom:Get(LevelOption *NoteRandom)
 NoteSpeedRandom:Get(LevelOption *NoteSpeedRandom)
 LevelAudioOffset:Get(LevelOption *LevelAudioOffset)
 LevelInputOffset:Get(LevelOption *LevelInputOffset)
@@ -1563,6 +1613,7 @@ NoteHeadHoldEffectCID:GetShifted(EntitySharedMemoryArray NoteHeadSharedMemoryOff
 *NoteTailX2:18
 *NoteTailSpeedMultiplier:19
 *NoteTailSpawnTime:20
+*NoteTailOriginalLane:21
 
 NoteHeadIndex:Get(EntityData *NoteHeadIndex)
 NoteTailTime:Get(EntityData *NoteTailTime)
@@ -1575,6 +1626,7 @@ NoteTailX1:Get(EntityData *NoteTailX1)
 NoteTailX2:Get(EntityData *NoteTailX2)
 NoteTailSpeedMultiplier:Get(EntityData *NoteTailSpeedMultiplier)
 NoteTailSpawnTime:Get(EntityData *NoteTailSpawnTime)
+NoteTailOriginalLane:Get(EntityData *NoteTailOriginalLane)
 
 NoteHeadInfoOffset:Multiply(NoteHeadIndex 3)
 NoteHeadDataOffset:Multiply(NoteHeadIndex 32)
@@ -1586,6 +1638,7 @@ NoteHeadTime:GetShifted(EntityDataArray NoteHeadDataOffset *NoteTailTime)
 NoteHeadLane:GetShifted(EntityDataArray NoteHeadDataOffset *NoteTailLane)
 NoteHeadSpeedMultiplier:GetShifted(EntityDataArray NoteHeadDataOffset *NoteTailSpeedMultiplier)
 NoteHeadSpawnTime:GetShifted(EntityDataArray NoteHeadDataOffset *NoteTailSpawnTime)
+NoteHeadOriginalLane:GetShifted(EntityDataArray NoteHeadDataOffset *NoteTailOriginalLane)
 
 SimLineTime1:GetShifted(EntityDataArray SimLineDataOffset1 *NoteTailTime)
 SimLineTime2:GetShifted(EntityDataArray SimLineDataOffset2 *NoteTailTime)
