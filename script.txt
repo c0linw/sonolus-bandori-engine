@@ -84,8 +84,7 @@ ProcessTouchHead:And(
             GreaterOr(Subtract(Time InputOffset) NoteHeadTime)
             Not(TempTouchOccupied)
             IsTouchY
-            GreaterOr(TempTouchX Subtract(NoteHeadX LaneWidth))
-            LessOr(TempTouchX Add(NoteHeadX LaneWidth))
+            LessOr(Abs(Subtract(TempTouchX NoteHeadX)) Multiply(LaneWidth 1.175))
             Execute(
                 Set(TemporaryMemory *TempTouchOccupied true)
                 Set(EntityMemory *InputState Activated)
