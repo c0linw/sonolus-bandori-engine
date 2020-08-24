@@ -509,7 +509,7 @@ StageCoverY:Lerp(LaneY2 LaneY1 StageCover)
         Auto
         SoundEffect
         And(AutoNoteArchetype)
-        GreaterOr(Time Subtract(AutoNoteTailTime 10))
+        GreaterOr(Time Subtract(AutoNoteTailTime 1))
         Execute(
             PlayScheduled(
                 If(
