@@ -31,16 +31,20 @@ PreprocessNote:Execute(
                     Set(LevelMemory *NoteMaxLane Min(NoteMaxLane Add(NoteHeadLane NoteLaneDiff)))
                 )
             )
-            Set(LevelMemory *NoteNotLane
-                If(
-                    NoteHasSimLine
-                    GetShifted(EntityDataArray Multiply(Subtract(Index 1) 32) *NoteTailLane)
-                    999
+            If(
+                NoteHasSimLine
+                Execute(
+                    Set(LevelMemory *NoteNotLane GetShifted(EntityDataArray Multiply(Subtract(Index 1) 32) *NoteTailLane))
+                    Set(LevelMemory *NoteNotSize Min(2 Max(Subtract(NoteNotLane NoteMinLane) Subtract(NoteMaxLane NoteNotLane))))
+                )
+                Execute(
+                    Set(LevelMemory *NoteNotLane 999)
+                    Set(LevelMemory *NoteNotSize 1)
                 )
             )
             Set(EntityData *NoteTailLane NoteNotLane)
             While(
-                Equal(NoteTailLane NoteNotLane)
+                Less(Abs(Subtract(NoteTailLane NoteNotLane)) NoteNotSize)
                 Set(EntityData *NoteTailLane RandomInteger(NoteMinLane Add(NoteMaxLane 1)))
             )
         )
@@ -1336,11 +1340,13 @@ TemporaryData:101
 *NoteMinLane:0
 *NoteMaxLane:1
 *NoteNotLane:2
-*NoteLaneDiff:3
+*NoteNotSize:3
+*NoteLaneDiff:4
 
 NoteMinLane:Get(LevelMemory *NoteMinLane)
 NoteMaxLane:Get(LevelMemory *NoteMaxLane)
 NoteNotLane:Get(LevelMemory *NoteNotLane)
+NoteNotSize:Get(LevelMemory *NoteNotSize)
 NoteLaneDiff:Get(LevelMemory *NoteLaneDiff)
 
 
