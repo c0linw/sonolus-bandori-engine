@@ -31,26 +31,37 @@ PreprocessNote:Execute(
                     Set(LevelMemory *NoteMaxLane Min(NoteMaxLane Add(NoteHeadLane NoteLaneDiff)))
                 )
             )
-            If(
-                NoteHasSimLine
+            And(
+                NoteRef
                 Execute(
-                    Set(LevelMemory *NoteNotLane GetShifted(EntityDataArray Multiply(Subtract(Index 1) 32) *NoteTailLane))
-                    Set(LevelMemory *NoteNotSize Min(2 Max(Subtract(NoteNotLane NoteMinLane) Subtract(NoteMaxLane NoteNotLane))))
-                )
-                Execute(
-                    Set(LevelMemory *NoteNotLane 999)
-                    Set(LevelMemory *NoteNotSize 1)
+                    Set(LevelMemory *NoteRefLane GetShifted(EntityDataArray Multiply(NoteRef 32) *NoteTailLane))
+                    If(
+                        Greater(GetShifted(EntityDataArray Multiply(NoteRef 32) *NoteTailOriginalLane) NoteTailOriginalLane)
+                        If(
+                            Greater(NoteRefLane NoteMinLane)
+                            Set(LevelMemory *NoteMaxLane Max(NoteMinLane Subtract(NoteRefLane 2)))
+                            Set(LevelMemory *NoteMinLane Min(NoteMaxLane Add(NoteRefLane 2)))
+                        )
+                        If(
+                            Less(NoteRefLane NoteMaxLane)
+                            Set(LevelMemory *NoteMinLane Min(NoteMaxLane Add(NoteRefLane 2)))
+                            Set(LevelMemory *NoteMaxLane Max(NoteMaxLane Subtract(NoteRefLane 2)))
+                        )
+                    )
                 )
             )
-            Set(EntityData *NoteTailLane NoteNotLane)
-            While(
-                Less(Abs(Subtract(NoteTailLane NoteNotLane)) NoteNotSize)
-                Set(EntityData *NoteTailLane RandomInteger(NoteMinLane Add(NoteMaxLane 1)))
-            )
+            Set(EntityData *NoteTailLane RandomInteger(NoteMinLane Add(NoteMaxLane 1)))
         )
     )
 
     Set(EntityData *NoteTailLane Multiply(NoteTailLane MirrorMultiplier))
+    Set(EntityData *NoteHasSimLine
+        And(
+            Equal(GetShifted(EntityDataArray Multiply(Subtract(Index 1) 32) *NoteTailTime) NoteTailTime)
+            NotEqual(Archetype 5)
+            NotEqual(GetShifted(EntityInfoArray Multiply(Subtract(Index 1) 3) *Archetype) 5)
+        )
+    )
     Set(EntityData *NoteTailX Multiply(LaneWidth NoteTailLane))
     Set(EntityData *NoteTailX1 Subtract(NoteTailX HalfNoteWidth))
     Set(EntityData *NoteTailX2 Add(NoteTailX HalfNoteWidth))
@@ -1339,15 +1350,13 @@ TemporaryData:101
 
 *NoteMinLane:0
 *NoteMaxLane:1
-*NoteNotLane:2
-*NoteNotSize:3
-*NoteLaneDiff:4
+*NoteLaneDiff:2
+*NoteRefLane:3
 
 NoteMinLane:Get(LevelMemory *NoteMinLane)
 NoteMaxLane:Get(LevelMemory *NoteMaxLane)
-NoteNotLane:Get(LevelMemory *NoteNotLane)
-NoteNotSize:Get(LevelMemory *NoteNotSize)
 NoteLaneDiff:Get(LevelMemory *NoteLaneDiff)
+NoteRefLane:Get(LevelMemory *NoteRefLane)
 
 
 
@@ -1611,6 +1620,7 @@ NoteHeadHoldEffectCID:GetShifted(EntitySharedMemoryArray NoteHeadSharedMemoryOff
 *NoteHeadIndex:0
 *NoteTailTime:1
 *NoteTailLane:2
+*NoteRef:3
 *NoteHasSimLine:3
 *NoteBucket:4
 *NoteTexture:5
@@ -1624,6 +1634,7 @@ NoteHeadHoldEffectCID:GetShifted(EntitySharedMemoryArray NoteHeadSharedMemoryOff
 NoteHeadIndex:Get(EntityData *NoteHeadIndex)
 NoteTailTime:Get(EntityData *NoteTailTime)
 NoteTailLane:Get(EntityData *NoteTailLane)
+NoteRef:Get(EntityData *NoteRef)
 NoteHasSimLine:Get(EntityData *NoteHasSimLine)
 NoteBucket:Get(EntityData *NoteBucket)
 NoteTexture:Get(EntityData *NoteTexture)
