@@ -12,6 +12,7 @@
 
 PreprocessNote:Execute(
     Set(EntityData *NoteTailTime Divide(Add(NoteTailTime NoteTimeOffset) Speed))
+    Set(EntityData *NoteTailLane Multiply(NoteTailLane MirrorMultiplier))
 
     And(
         NoteRandom
@@ -54,7 +55,6 @@ PreprocessNote:Execute(
         )
     )
 
-    Set(EntityData *NoteTailLane Multiply(NoteTailLane MirrorMultiplier))
     Set(EntityData *NoteHasSimLine
         And(
             Equal(GetShifted(EntityDataArray Multiply(Subtract(Index 1) 32) *NoteTailTime) NoteTailTime)
