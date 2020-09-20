@@ -65,17 +65,7 @@ PreprocessNote:Execute(
     Set(EntityData *NoteTailX Multiply(LaneWidth NoteTailLane))
     Set(EntityData *NoteTailX1 Subtract(NoteTailX HalfNoteWidth))
     Set(EntityData *NoteTailX2 Add(NoteTailX HalfNoteWidth))
-    Set(EntityData *NoteTailSpeedMultiplier
-        If(
-            NoteSpeedRandom
-            If(
-                RandomInteger(0 2)
-                Random(1 2)
-                Divide(1 Random(1 2))
-            )
-            1
-        )
-    )
+    Set(EntityData *NoteTailSpeedMultiplier If(NoteSpeedRandom Random(1 2) 1))
     Set(EntityData *NoteTailSpawnTime Subtract(NoteTailTime Multiply(NoteScreenTime NoteTailSpeedMultiplier)))
 )
 
