@@ -68,6 +68,11 @@ PreprocessNote:Execute(
     Set(EntityData *NoteTailSpeedMultiplier If(NoteSpeedRandom Random(1 2) 1))
     Set(EntityData *NoteTailSpawnTime Subtract(NoteTailTime Multiply(NoteScreenTime NoteTailSpeedMultiplier)))
     Set(EntityData *NoteZ Subtract(LayerNoteBody Divide(NoteTailTime 1000)))
+
+    And(
+        Equal(Archetype 7)
+        Set(EntityData *NoteIsStraightSlideFlick Equal(NoteHeadLane NoteTailLane))
+    )
 )
 
 SpawnOrderHead:NoteHeadSpawnTime
@@ -553,11 +558,11 @@ InputOffset:Add(DeviceInputOffset Divide(LevelInputOffset 1000))
             Set(LevelBucket 28 -150)
             Set(LevelBucket 29 150)
 
-            Set(LevelBucket 30 0)
+            Set(LevelBucket 30 -50)
             Set(LevelBucket 31 50)
-            Set(LevelBucket 32 0)
+            Set(LevelBucket 32 -100)
             Set(LevelBucket 33 100)
-            Set(LevelBucket 34 0)
+            Set(LevelBucket 34 -150)
             Set(LevelBucket 35 150)
         )
         Execute(
@@ -575,11 +580,11 @@ InputOffset:Add(DeviceInputOffset Divide(LevelInputOffset 1000))
             Set(LevelBucket 28 -150)
             Set(LevelBucket 29 200)
 
-            Set(LevelBucket 30 0)
+            Set(LevelBucket 30 -50)
             Set(LevelBucket 31 200)
-            Set(LevelBucket 32 0)
+            Set(LevelBucket 32 -100)
             Set(LevelBucket 33 200)
-            Set(LevelBucket 34 0)
+            Set(LevelBucket 34 -150)
             Set(LevelBucket 35 200)
         )
     )
@@ -1115,7 +1120,10 @@ StageCoverY:Lerp(LaneY2 LaneY1 StageCover)
                 Set(LevelMemory *Tilt Add(Tilt TempTouchX))
                 And(
                     Equal(InputState Activated)
-                    GreaterOr(Subtract(Time InputOffset) NoteTailTime)
+                    If(NoteIsStraightSlideFlick
+                        IsNoteTailInGoodWindow
+                        GreaterOr(Subtract(Time InputOffset) NoteTailTime)
+                    )
                     IsTouchY
                     IsTouchXInTailLane
                     Set(EntityMemory *InputState ActivatedNext)
@@ -1792,6 +1800,7 @@ NoteHeadHoldEffectCID:GetShifted(EntitySharedMemoryArray NoteHeadSharedMemoryOff
 *NoteTailSpawnTime:20
 *NoteTailOriginalLane:21
 *NoteZ:22
+*NoteIsStraightSlideFlick:23
 
 NoteHeadIndex:Get(EntityData *NoteHeadIndex)
 NoteTailTime:Get(EntityData *NoteTailTime)
@@ -1807,6 +1816,7 @@ NoteTailSpeedMultiplier:Get(EntityData *NoteTailSpeedMultiplier)
 NoteTailSpawnTime:Get(EntityData *NoteTailSpawnTime)
 NoteTailOriginalLane:Get(EntityData *NoteTailOriginalLane)
 NoteZ:Get(EntityData *NoteZ)
+NoteIsStraightSlideFlick:Get(EntityData *NoteIsStraightSlideFlick)
 
 NoteHeadInfoOffset:Multiply(NoteHeadIndex 3)
 NoteHeadDataOffset:Multiply(NoteHeadIndex 32)
