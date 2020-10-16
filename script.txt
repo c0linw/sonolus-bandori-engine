@@ -1386,7 +1386,7 @@ GoodWindowNegative:Multiply(-1 GoodWindow)
 SlideWindow:0.2
 
 JudgeYMax:0
-MinVR:1.5
+MinVR:3
 
 MinEffectTime:0.02
 
