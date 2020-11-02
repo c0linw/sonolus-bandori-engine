@@ -1,62 +1,126 @@
 {
-    "configuration": {
-        "menu": {
-            "position": {
-                "anchor": {
-                    "x": 1,
-                    "y": 1
-                },
-                "pivot": {
-                    "x": 1,
-                    "y": 1
-                }
-            }
-        },
-        "score": {
-            "position": {
-                "anchor": {
+    "buckets": [
+        {
+            "sprites": [
+                {
+                    "id": 1006,
                     "x": 0,
-                    "y": 1
-                },
-                "pivot": {
+                    "y": 0,
+                    "w": 2,
+                    "h": 2,
+                    "rotation": -90
+                }
+            ]
+        },
+        {
+            "sprites": [
+                {
+                    "id": 1001,
                     "x": 0,
-                    "y": 1
-                }
-            },
-            "text": {
-                "horizontal": "left",
-                "vertical": "top"
-            }
-        },
-        "combo": {
-            "position": {
-                "anchor": {
-                    "x": 0.9,
-                    "y": 0.5
+                    "y": 0,
+                    "w": 2,
+                    "h": 2,
+                    "rotation": -90
                 },
-                "pivot": {
-                    "x": 0.5,
-                    "y": 0.5
+                {
+                    "id": 21001,
+                    "x": 0,
+                    "y": 0,
+                    "w": 2,
+                    "h": 2,
+                    "rotation": -90
                 }
-            }
+            ]
         },
-        "judgement": {
-            "position": {
-                "anchor": {
+        {
+            "sprites": [
+                {
+                    "id": 11002,
                     "x": 0.5,
-                    "y": 0.25
+                    "y": 0,
+                    "w": 2,
+                    "h": 5,
+                    "rotation": -90
                 },
-                "pivot": {
-                    "x": 0.5,
-                    "y": 0
+                {
+                    "id": 1002,
+                    "x": -2,
+                    "y": 0,
+                    "w": 2,
+                    "h": 2,
+                    "rotation": -90
                 }
-            },
-            "text": {
-                "horizontal": "center",
-                "vertical": "bottom"
-            }
+            ]
+        },
+        {
+            "sprites": [
+                {
+                    "id": 11002,
+                    "x": 0,
+                    "y": 0,
+                    "w": 2,
+                    "h": 6,
+                    "rotation": -90
+                },
+                {
+                    "id": 2002,
+                    "x": 0,
+                    "y": 0,
+                    "w": 2,
+                    "h": 2,
+                    "rotation": -90
+                }
+            ]
+        },
+        {
+            "sprites": [
+                {
+                    "id": 11002,
+                    "x": -0.5,
+                    "y": 0,
+                    "w": 2,
+                    "h": 5,
+                    "rotation": -90
+                },
+                {
+                    "id": 1002,
+                    "x": 2,
+                    "y": 0,
+                    "w": 2,
+                    "h": 2,
+                    "rotation": -90
+                }
+            ]
+        },
+        {
+            "sprites": [
+                {
+                    "id": 11002,
+                    "x": -0.5,
+                    "y": 0,
+                    "w": 2,
+                    "h": 5,
+                    "rotation": -90
+                },
+                {
+                    "id": 1001,
+                    "x": 2,
+                    "y": 0,
+                    "w": 2,
+                    "h": 2,
+                    "rotation": -90
+                },
+                {
+                    "id": 21001,
+                    "x": 2,
+                    "y": 0,
+                    "w": 2,
+                    "h": 2,
+                    "rotation": -90
+                }
+            ]
         }
-    },
+    ],
     "entities": [
         {
             "archetype": 0
@@ -77,7 +141,10 @@
             "input": true,
             "data": {
                 "index": 4,
-                "values": [0]
+                "values": [
+                    1,
+                    1006
+                ]
             }
         },
         {
@@ -85,7 +152,10 @@
             "input": true,
             "data": {
                 "index": 4,
-                "values": [5]
+                "values": [
+                    3,
+                    1002
+                ]
             }
         },
         {
@@ -93,7 +163,10 @@
             "input": true,
             "data": {
                 "index": 4,
-                "values": [4]
+                "values": [
+                    2,
+                    1001
+                ]
             }
         },
         {
@@ -101,7 +174,10 @@
             "input": true,
             "data": {
                 "index": 4,
-                "values": [6]
+                "values": [
+                    4,
+                    2002
+                ]
             }
         },
         {
@@ -109,7 +185,10 @@
             "input": true,
             "data": {
                 "index": 4,
-                "values": [5]
+                "values": [
+                    5,
+                    1002
+                ]
             }
         },
         {
@@ -117,7 +196,10 @@
             "input": true,
             "data": {
                 "index": 4,
-                "values": [4]
+                "values": [
+                    6,
+                    1001
+                ]
             }
         }
     ]
